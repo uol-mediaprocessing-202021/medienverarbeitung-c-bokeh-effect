@@ -1,3 +1,3 @@
 #### medienverarbeitung-c-bokeh-effect
-Gruppe C Malte Trauernicht, Jona Shrader, Roman Kammer
+Gruppe C Malte Trauernicht, Jona Schrader, Roman Kammer
 

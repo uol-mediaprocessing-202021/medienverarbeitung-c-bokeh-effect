@@ -4,6 +4,7 @@ from PIL import ImageTk, Image
 from tkinter import filedialog
 
 
+# provides text for the 'About' window
 def help_about():
     about_text = "\
 Project: Media Processing Group C (University Oldenburg)\n\
@@ -12,11 +13,13 @@ Version: alpha 0.01"
     messagebox.showinfo(message=about_text, title="About")
 
 
+# open pictures
 def openfn():
     filename = filedialog.askopenfilename(title='open')
     return filename
 
 
+# display opened picture
 def open_image():
     x = openfn()
     img = Image.open(x)
@@ -27,6 +30,7 @@ def open_image():
     panel.pack()
 
 
+# list of all effects
 EFFECTS = ["No Effect", "Gauß", "Ring", "Star"]
 
 # Create root frame and format it
@@ -34,6 +38,7 @@ root = Tk()
 root.title("Bokeh Effect")
 root.config(background="#474747")
 
+# create sub frames
 main_frame = Frame(root, width=500, height=500, background="#a5a5a5")
 main_frame.pack(side=LEFT, padx=1, pady=1, fill=BOTH)
 

@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
+from PIL import ImageTk, Image
+from tkinter import filedialog
 
 
 def help_about():
@@ -8,6 +10,21 @@ Project: Media Processing Group C (University Oldenburg)\n\
 Authors: Jona Schrader, Roman Kammer, Malte Trauernicht\n\
 Version: alpha 0.01"
     messagebox.showinfo(message=about_text, title="About")
+
+
+def openfn():
+    filename = filedialog.askopenfilename(title='open')
+    return filename
+
+
+def open_image():
+    x = openfn()
+    img = Image.open(x)
+    img = img.resize((500, 500), Image.ANTIALIAS)
+    img = ImageTk.PhotoImage(img)
+    panel = Label(main_frame, image=img)
+    panel.image = img
+    panel.pack()
 
 
 EFFECTS = ["No Effect", "Gauß", "Ring", "Star"]
@@ -56,7 +73,7 @@ help_menu = Menu(menu, tearoff=0)
 
 # content of File
 file_menu.add_command(label="Reset")
-file_menu.add_command(label="Open Image")
+file_menu.add_command(label="Open Image", command=open_image)
 file_menu.add_command(label="Save Image to")
 file_menu.add_separator()
 file_menu.add_command(label="Quit", command=root.quit)

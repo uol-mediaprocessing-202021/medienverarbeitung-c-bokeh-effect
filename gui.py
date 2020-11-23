@@ -14,14 +14,9 @@ Version: alpha 0.01"
 
 
 # open pictures
-def openfn():
-    filename = filedialog.askopenfilename(title='open')
-    return filename
-
-
-# display opened picture
 def open_image():
-    x = openfn()
+    x = filedialog.askopenfilename(title='Open Image')
+    global img
     img = Image.open(x)
     img = img.resize((500, 500), Image.ANTIALIAS)
     img = ImageTk.PhotoImage(img)
@@ -30,10 +25,15 @@ def open_image():
     panel.pack()
 
 
-# list of all effects
-EFFECTS = ["No Effect", "Gauß", "Ring", "Star"]
+# save pictures
+def save_image():
+    y = filedialog.asksaveasfilename(title='Save Image As', defaultextension='.png')
+    global img
+    print(img.width())
+    print(y)
 
-# Create root frame and format it
+
+# create root frame and format it
 root = Tk()
 root.title("Bokeh Effect")
 root.config(background="#474747")
@@ -45,29 +45,21 @@ main_frame.pack(side=LEFT, padx=1, pady=1, fill=BOTH)
 tool_frame = Frame(root)  # width=200, height=500, background="#d4d4d4"
 tool_frame.pack(side=LEFT, padx=1, pady=1, fill=BOTH)
 
-# create controls
+# create effect controls
 options_label = Label(tool_frame, text="Effects")
 options_label.pack(pady=10)
 
-var = StringVar(tool_frame)
-var.set(EFFECTS[0])
-options = OptionMenu(tool_frame, var, *EFFECTS)
-options.pack(pady=20, fill=BOTH)
+no_button = Button(tool_frame, text="No Effect")
+no_button.pack(padx=30, pady=30, fill=BOTH)
 
-slider1_label = Label(tool_frame, text="Slider 1")
-slider1_label.pack()
+ring_button = Button(tool_frame, text="Ring")
+ring_button.pack(padx=30, pady=30, fill=BOTH)
 
-first_slider = Scale(tool_frame, from_=0, to=100, orient=HORIZONTAL)
-first_slider.pack(pady=20, fill=BOTH)
+star_button = Button(tool_frame, text="Star")
+star_button.pack(padx=30, pady=30, fill=BOTH)
 
-slider2_label = Label(tool_frame, text="Slider 2")
-slider2_label.pack()
-
-sec_slider = Scale(tool_frame, from_=0, to=100, orient=HORIZONTAL)
-sec_slider.pack(pady=20, fill=BOTH)
-
-change_button = Button(tool_frame, text="Apply")
-change_button.pack(padx=50, pady=50, fill=BOTH)
+square_button = Button(tool_frame, text="Square")
+square_button.pack(padx=30, pady=30, fill=BOTH)
 
 # create menu
 menu = Menu(root)
@@ -79,7 +71,7 @@ help_menu = Menu(menu, tearoff=0)
 # content of File
 file_menu.add_command(label="Reset")
 file_menu.add_command(label="Open Image", command=open_image)
-file_menu.add_command(label="Save Image to")
+file_menu.add_command(label="Save Image As", command=save_image)
 file_menu.add_separator()
 file_menu.add_command(label="Quit", command=root.quit)
 
@@ -90,6 +82,8 @@ help_menu.add_command(label="About", command=help_about)
 menu.add_cascade(label="File", menu=file_menu)
 menu.add_cascade(label="Help", menu=help_menu)
 root.config(menu=menu)
+
+img = ImageTk.PhotoImage(Image.open("placeholder.png"))
 
 # loop that waits for user input
 root.mainloop()

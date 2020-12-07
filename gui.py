@@ -15,6 +15,15 @@ Version: Alpha 0.01"
     messagebox.showinfo(message=about_text, title="Über das Projekt")
 
 
+# Text für Punkt 'Tutorial' im Reiter Hilfe
+def help_tut():
+    about_text = "\
+1: Lade ein Bild unter Datei --> Öffnen...\n\
+2: Klicke auf den gewünschten Effekt in der Effektleiste\n\
+3: Speicher das Bild unter Datei --> Speichern unter..."
+    messagebox.showinfo(message=about_text, title="Tutorial")
+
+
 # Bilder öffnen
 def open_image():
     x = filedialog.askopenfilename(title='Bild öffnen')
@@ -39,17 +48,17 @@ def save_image():
 # Äußeres Fenster erstellen
 root = Tk()
 root.title("Bokeh Effekt")
-root.config(background="#474747")
+root.config(background="#99aab5")
 
 # Innere Fenster erstellen
-info_frame = Frame(root, width=700, height=20, background="#5c5c5c", highlightbackground="black", highlightthickness=1)
-info_frame.pack(side=BOTTOM, padx=1, pady=1, fill=BOTH)
+info_frame = Frame(root, width=700, height=20, background="#23272a")
+info_frame.pack(side=BOTTOM, fill=BOTH)
 
-tool_frame = Frame(root, width=200, background="#454545", highlightbackground="black", highlightthickness=1)
-tool_frame.pack(side=LEFT, padx=1, pady=1, fill=BOTH)
+tool_frame = Frame(root, width=200, background="#2c2f33")
+tool_frame.pack(side=LEFT, fill=BOTH)
 
-main_frame = Frame(root, width=500, height=500, background="#5c5c5c", highlightbackground="black", highlightthickness=1)
-main_frame.pack(side=LEFT, padx=1, pady=1, fill=BOTH, expand=True)
+main_frame = Frame(root, width=500, height=500, background="#3a3e43")
+main_frame.pack(side=LEFT, fill=BOTH, expand=True)
 
 # Icons für Buttons laden
 noe = Image.open("images/nothing.png")
@@ -71,26 +80,26 @@ sqr = ImageTk.PhotoImage(sqr)
 # Buttons für Effekte erstellen
 title_font = font.Font(family='Arial', size=16, weight='bold')
 
-options_label = Label(tool_frame, text="Effekte", background="#454545", fg="white")
+options_label = Label(tool_frame, text="Effekte", background="#2c2f33", fg="white")
 options_label.config(font=title_font)
 options_label.pack(pady=10)
 
-no_button = Button(tool_frame, image=noe, background="#454545", borderwidth=0, activebackground="#454545")
+no_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33")
 no_button.pack(padx=35, pady=35, fill=BOTH)
 
-ring_button = Button(tool_frame, image=ring, background="#454545", borderwidth=0, activebackground="#454545")
+ring_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33")
 ring_button.pack(padx=35, pady=35, fill=BOTH)
 
-star_button = Button(tool_frame, image=star, background="#454545", borderwidth=0, activebackground="#454545")
+star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33")
 star_button.pack(padx=35, pady=35, fill=BOTH)
 
-square_button = Button(tool_frame, image=sqr, background="#454545", borderwidth=0, activebackground="#454545")
+square_button = Button(tool_frame, image=sqr, background="#2c2f33", borderwidth=0, activebackground="#2c2f33")
 square_button.pack(padx=35, pady=35, fill=BOTH)
 
 # label für Bildinfo erstellen
-info_label = Label(info_frame, background="#5c5c5c")
+info_label = Label(info_frame, background="#23272a", fg="white")
 info_label.pack(side=RIGHT)
-version_label = Label(info_frame, background="#5c5c5c", text="Version: Alpha 0.01").pack(side=LEFT)
+version_label = Label(info_frame, background="#23272a", text="Version: Alpha 0.01", fg="white").pack(side=LEFT)
 
 # Menü erstellen
 menu = Menu(root)
@@ -109,6 +118,7 @@ menu.add_cascade(label="Datei", menu=file_menu)
 
 # Unterreiter für 'Hilfe'
 help_menu.add_command(label="Über das Projekt", command=help_about)
+help_menu.add_command(label="Tutorial", command=help_tut)
 menu.add_cascade(label="Hilfe", menu=help_menu)
 
 root.config(menu=menu)

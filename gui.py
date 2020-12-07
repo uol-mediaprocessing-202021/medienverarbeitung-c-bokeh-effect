@@ -11,7 +11,7 @@ def help_about():
 Projekt: Medienverarbeitung Gruppe C\n\
 Carl-von-Ossietzky Universität Oldenburg\n\
 Authors: Jona Schrader, Roman Kammer, Malte Trauernicht\n\
-Version: alpha 0.01"
+Version: Alpha 0.01"
     messagebox.showinfo(message=about_text, title="Über das Projekt")
 
 
@@ -25,6 +25,7 @@ def open_image():
     panel = Label(main_frame, image=img, highlightbackground="black", highlightthickness=1)
     panel.image = img
     panel.place(anchor="center", relx=0.5, rely=0.5)
+    info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
 
 
 # Bilder speichern
@@ -41,11 +42,14 @@ root.title("Bokeh Effekt")
 root.config(background="#474747")
 
 # Innere Fenster erstellen
+info_frame = Frame(root, width=700, height=20, background="#5c5c5c", highlightbackground="black", highlightthickness=1)
+info_frame.pack(side=BOTTOM, padx=1, pady=1, fill=BOTH)
+
+tool_frame = Frame(root, width=200, background="#454545", highlightbackground="black", highlightthickness=1)
+tool_frame.pack(side=LEFT, padx=1, pady=1, fill=BOTH)
+
 main_frame = Frame(root, width=500, height=500, background="#5c5c5c", highlightbackground="black", highlightthickness=1)
 main_frame.pack(side=LEFT, padx=1, pady=1, fill=BOTH, expand=True)
-
-tool_frame = Frame(root, background="#454545", highlightbackground="black", highlightthickness=1)
-tool_frame.pack(side=LEFT, padx=1, pady=1, fill=BOTH)
 
 # Icons für Buttons laden
 noe = Image.open("images/nothing.png")
@@ -72,16 +76,21 @@ options_label.config(font=title_font)
 options_label.pack(pady=10)
 
 no_button = Button(tool_frame, image=noe, background="#454545", borderwidth=0, activebackground="#454545")
-no_button.pack(padx=30, pady=30, fill=BOTH)
+no_button.pack(padx=35, pady=35, fill=BOTH)
 
 ring_button = Button(tool_frame, image=ring, background="#454545", borderwidth=0, activebackground="#454545")
-ring_button.pack(padx=30, pady=30, fill=BOTH)
+ring_button.pack(padx=35, pady=35, fill=BOTH)
 
 star_button = Button(tool_frame, image=star, background="#454545", borderwidth=0, activebackground="#454545")
-star_button.pack(padx=30, pady=30, fill=BOTH)
+star_button.pack(padx=35, pady=35, fill=BOTH)
 
 square_button = Button(tool_frame, image=sqr, background="#454545", borderwidth=0, activebackground="#454545")
-square_button.pack(padx=30, pady=30, fill=BOTH)
+square_button.pack(padx=35, pady=35, fill=BOTH)
+
+# label für Bildinfo erstellen
+info_label = Label(info_frame, background="#5c5c5c")
+info_label.pack(side=RIGHT)
+version_label = Label(info_frame, background="#5c5c5c", text="Version: Alpha 0.01").pack(side=LEFT)
 
 # Menü erstellen
 menu = Menu(root)
@@ -92,8 +101,8 @@ help_menu = Menu(menu, tearoff=0)
 
 # Unterreiter für 'Datei'
 file_menu.add_command(label="Neu ...")
-file_menu.add_command(label="Bild öffnen ...", command=open_image)
-file_menu.add_command(label="Bild speichern unter ...", command=save_image)
+file_menu.add_command(label="Öffnen ...", command=open_image)
+file_menu.add_command(label="Speichern unter ...", command=save_image)
 file_menu.add_separator()
 file_menu.add_command(label="Beenden", command=root.quit)
 menu.add_cascade(label="Datei", menu=file_menu)

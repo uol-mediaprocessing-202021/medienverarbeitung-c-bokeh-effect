@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 from tkinter import filedialog
 import tkinter.font as font
 import numpy as np
+import os
 
 
 # Text für Punkt 'Über das Projekt' im Reiter Hilfe
@@ -27,7 +28,7 @@ def help_tut():
 
 # Bilder öffnen
 def open_image():
-    global img, ori_img, panel, file_menu
+    global img, ori_img, panel, file_menu, x
 
     x = filedialog.askopenfilename(title='Bild öffnen')
     img = Image.open(x)
@@ -42,9 +43,15 @@ def open_image():
 
 # Bilder speichern
 def save_image():
-    global img, panel
+    global img, panel, x
 
-    y = filedialog.asksaveasfilename(title='Bild speichern unter', defaultextension='.png')
+    y = filedialog.asksaveasfilename(title='Bild speichern unter', filetypes=(
+                ("PNG Datei (*.png)", "*.png"),
+                ("JPEG Datei (*.jpeg)", "*.jpeg"),
+                ("GIF Datei (*.gif)", "*.gif"),
+                ("Alle Dateien", "*.*"),
+            ), defaultextension='.png', initialfile=os.path.basename(x))
+    print(y)
 
     # extract rgb from image of label1
     width, height = panel.image._PhotoImage__size
@@ -141,6 +148,7 @@ root.config(menu=menu)
 
 # reserviere Speicherplatz für zu bearbeitendes Bild und kopie für reset
 img = None
+x = None
 ori_img = img
 
 # Schleife die auf Nutzerinput wartet

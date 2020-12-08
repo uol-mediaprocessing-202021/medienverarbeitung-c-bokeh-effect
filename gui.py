@@ -1,34 +1,14 @@
 from tkinter import *
-from tkinter import messagebox
-from PIL import Image, ImageTk
-from tkinter import filedialog
 import tkinter.font as font
-import numpy as np
+from functions import func_gui
+from PIL import Image, ImageTk, ImageFilter
+from tkinter import filedialog
 import os
-
-
-# Text für Punkt 'Über das Projekt' im Reiter Hilfe
-def help_about():
-    about_text = "\
-Projekt: Medienverarbeitung Gruppe C\n\
-Carl-von-Ossietzky Universität Oldenburg\n\
-Authors: Jona Schrader, Roman Kammer, Malte Trauernicht\n\
-Version: Alpha 0.01"
-    messagebox.showinfo(message=about_text, title="Über das Projekt")
-
-
-# Text für Punkt 'Tutorial' im Reiter Hilfe
-def help_tut():
-    about_text = "\
-1: Lade ein Bild unter Datei --> Öffnen...\n\
-2: Klicke auf den gewünschten Effekt in der Effektleiste\n\
-3: Speicher das Bild unter Datei --> Speichern unter..."
-    messagebox.showinfo(message=about_text, title="Tutorial")
 
 
 # Bilder öffnen
 def open_image():
-    global img, ori_img, panel, file_menu, x
+    global img, ori_img, panel, file_menu, x, info_label
 
     x = filedialog.askopenfilename(title='Bild öffnen')
     img = Image.open(x)
@@ -51,18 +31,27 @@ def save_image():
                 ("GIF Datei (*.gif)", "*.gif"),
                 ("Alle Dateien", "*.*"),
             ), defaultextension='.png', initialfile=os.path.basename(x))
-    print(y)
 
-    # extract rgb from image of label1
-    width, height = panel.image._PhotoImage__size
-    rgb = np.empty((height, width, 3))
-    for j in range(height):
-        for i in range(width):
-            rgb[j, i, :] = panel.image._PhotoImage__photo.get(x=i, y=j)
-
-    # create new image from rgb, resize and use for label2
-    new_image = Image.fromarray(rgb.astype('uint8'))
+    new_image = func_gui.covert_imgtk2img(panel)
     new_image.save(y)
+
+
+# bearbeitet Bild mit Gauss Filter (zum test)
+def gauss():
+    global panel, img
+    g_img = func_gui.covert_imgtk2img(panel)
+    img = g_img.filter(ImageFilter.GaussianBlur(radius=5))
+    img = ImageTk.PhotoImage(img)
+    panel.config(image=img)
+    panel.image = img
+
+
+# setzt das Bild zum Ursprung urück
+def reset():
+    global panel, img, ori_img
+    img = ori_img
+    panel.config(image=img)
+    panel.image = img
 
 
 # Äußeres Fenster erstellen
@@ -97,6 +86,9 @@ sqr = Image.open("images/squares.png")
 sqr = sqr.resize((35, 35), Image.ANTIALIAS)
 sqr = ImageTk.PhotoImage(sqr)
 
+# Label für Bilddarstellung
+panel = Label(main_frame)
+
 # Buttons für Effekte erstellen
 title_font = font.Font(family='Arial', size=16, weight='bold')
 
@@ -104,25 +96,26 @@ options_label = Label(tool_frame, text="Effekte", background="#2c2f33", fg="whit
 options_label.config(font=title_font)
 options_label.pack(pady=10)
 
-no_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33")
+no_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                   command=reset)
 no_button.pack(padx=35, pady=35, fill=BOTH)
 
-ring_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33")
+ring_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                     command=gauss)
 ring_button.pack(padx=35, pady=35, fill=BOTH)
 
-star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33")
+star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                     command=gauss)
 star_button.pack(padx=35, pady=35, fill=BOTH)
 
-square_button = Button(tool_frame, image=sqr, background="#2c2f33", borderwidth=0, activebackground="#2c2f33")
+square_button = Button(tool_frame, image=sqr, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                       command=gauss)
 square_button.pack(padx=35, pady=35, fill=BOTH)
 
 # label für Bildinfo erstellen
 info_label = Label(info_frame, background="#23272a", fg="white")
 info_label.pack(side=RIGHT)
 version_label = Label(info_frame, background="#23272a", text="Version: Alpha 0.01", fg="white").pack(side=LEFT)
-
-# Label für Bilddarstellung
-panel = Label(main_frame)
 
 # Menü erstellen
 menu = Menu(root)
@@ -140,16 +133,16 @@ file_menu.add_command(label="Beenden", command=root.quit)
 menu.add_cascade(label="Datei", menu=file_menu)
 
 # Unterreiter für 'Hilfe'
-help_menu.add_command(label="Über das Projekt", command=help_about)
-help_menu.add_command(label="Tutorial", command=help_tut)
+help_menu.add_command(label="Über das Projekt", command=func_gui.help_about)
+help_menu.add_command(label="Tutorial", command=func_gui.help_tut)
 menu.add_cascade(label="Hilfe", menu=help_menu)
 
 root.config(menu=menu)
 
 # reserviere Speicherplatz für zu bearbeitendes Bild und kopie für reset
-img = None
-x = None
+img = ImageTk.PhotoImage(Image.open('images/placeholder.png'))
 ori_img = img
+x = ' '
 
 # Schleife die auf Nutzerinput wartet
 root.mainloop()

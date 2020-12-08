@@ -13,19 +13,21 @@ rect_id = None
 def open_image():
     global img, ori_img, panel, file_menu, x, info_label, rect_id
 
+    # Bild laden und in canvas (panel) speichern
     x = filedialog.askopenfilename(title='Bild öffnen')
     img = Image.open(x)
     img = ImageTk.PhotoImage(img)
     ori_img = img
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
+    panel.place(anchor="center", relx=0.5, rely=0.5)
 
+    # Fokusbereich initialisieren
     rect_id = panel.create_rectangle(topx, topy, topx, topy, dash=(20, 20), fill='', outline='white')
-
     panel.bind('<Button-1>', get_mouse_posn)
     panel.bind('<B1-Motion>', update_sel_rect)
 
-    panel.place(anchor="center", relx=0.5, rely=0.5)
+    # infoleiste updaten und speichern unter ermöglichen
     info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
     file_menu.entryconfig("Speichern unter ...", state="normal")
 
@@ -51,25 +53,27 @@ def gauss():
     g_img = func_gui.covert_imgtk2img(img)
     img = g_img.filter(ImageFilter.GaussianBlur(radius=5))
     img = ImageTk.PhotoImage(img)
-    # panel.config(image=img)
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
 
-# setzt das Bild zum Ursprung urück
+# setzt das Bild zum Ursprung zurück
 def reset():
     global panel, img, ori_img
     img = ori_img
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
+    reset_sel_rect()
 
 
+# trackt Maus position
 def get_mouse_posn(event):
     global topy, topx
 
     topx, topy = event.x, event.y
 
 
+# updated Fokusbereich
 def update_sel_rect(event):
     global rect_id, panel
     global topy, topx, botx, boty
@@ -78,8 +82,18 @@ def update_sel_rect(event):
     panel.coords(rect_id, topx, topy, botx, boty)  # Update selection rect.
 
 
+# reset Fokusbereich zu 0
+def reset_sel_rect():
+    global rect_id, panel
+    panel.delete(rect_id)
+    rect_id = panel.create_rectangle(topx, topy, topx, topy, dash=(20, 20), fill='', outline='white')
+    panel.bind('<Button-1>', get_mouse_posn)
+    panel.bind('<B1-Motion>', update_sel_rect)
+
+
 # Äußeres Fenster erstellen
 root = Tk()
+root.iconbitmap('images/camera.ico')
 root.title("Bokeh Effekt")
 root.config(background="#99aab5")
 
@@ -110,6 +124,10 @@ sqr = Image.open("images/squares.png")
 sqr = sqr.resize((35, 35), Image.ANTIALIAS)
 sqr = ImageTk.PhotoImage(sqr)
 
+res = Image.open("images/reset.png")
+res = res.resize((35, 35), Image.ANTIALIAS)
+res = ImageTk.PhotoImage(res)
+
 # reserviere Speicherplatz für zu bearbeitendes Bild und kopie für reset
 img = ImageTk.PhotoImage(Image.open('images/placeholder.png'))
 ori_img = img
@@ -122,8 +140,7 @@ panel.img = img
 # Buttons für Effekte erstellen
 title_font = font.Font(family='Arial', size=16, weight='bold')
 
-options_label = Label(tool_frame, text="Effekte", background="#2c2f33", fg="white")
-options_label.config(font=title_font)
+options_label = Label(tool_frame, text="Effekte", background="#2c2f33", fg="white", font=title_font)
 options_label.pack(pady=10)
 
 no_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
@@ -141,6 +158,10 @@ star_button.pack(padx=35, pady=35, fill=BOTH)
 square_button = Button(tool_frame, image=sqr, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                        command=gauss)
 square_button.pack(padx=35, pady=35, fill=BOTH)
+
+fokus_reset = Button(tool_frame, image=res, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                     font=title_font, fg="white", command=reset_sel_rect)
+fokus_reset.pack(padx=35, pady=35, fill=BOTH, side=BOTTOM)
 
 # label für Bildinfo erstellen
 info_label = Label(info_frame, background="#23272a", fg="white")

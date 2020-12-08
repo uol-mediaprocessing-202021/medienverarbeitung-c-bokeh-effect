@@ -5,17 +5,26 @@ from PIL import Image, ImageTk, ImageFilter
 from tkinter import filedialog
 import os
 
+topx, topy, botx, boty = 0, 0, 0, 0
+rect_id = None
+
 
 # Bilder öffnen
 def open_image():
-    global img, ori_img, panel, file_menu, x, info_label
+    global img, ori_img, panel, file_menu, x, info_label, rect_id
 
     x = filedialog.askopenfilename(title='Bild öffnen')
     img = Image.open(x)
     img = ImageTk.PhotoImage(img)
     ori_img = img
-    panel.config(image=img)
-    panel.image = img
+    panel.config(width=img.width(), height=img.height())
+    panel.create_image(0, 0, image=img, anchor=NW)
+
+    rect_id = panel.create_rectangle(topx, topy, topx, topy, dash=(20, 20), fill='', outline='white')
+
+    panel.bind('<Button-1>', get_mouse_posn)
+    panel.bind('<B1-Motion>', update_sel_rect)
+
     panel.place(anchor="center", relx=0.5, rely=0.5)
     info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
     file_menu.entryconfig("Speichern unter ...", state="normal")
@@ -32,26 +41,41 @@ def save_image():
                 ("Alle Dateien", "*.*"),
             ), defaultextension='.png', initialfile=os.path.basename(x))
 
-    new_image = func_gui.covert_imgtk2img(panel)
+    new_image = func_gui.covert_imgtk2img(img)
     new_image.save(y)
 
 
 # bearbeitet Bild mit Gauss Filter (zum test)
 def gauss():
     global panel, img
-    g_img = func_gui.covert_imgtk2img(panel)
+    g_img = func_gui.covert_imgtk2img(img)
     img = g_img.filter(ImageFilter.GaussianBlur(radius=5))
     img = ImageTk.PhotoImage(img)
-    panel.config(image=img)
-    panel.image = img
+    # panel.config(image=img)
+    panel.config(width=img.width(), height=img.height())
+    panel.create_image(0, 0, image=img, anchor=NW)
 
 
 # setzt das Bild zum Ursprung urück
 def reset():
     global panel, img, ori_img
     img = ori_img
-    panel.config(image=img)
-    panel.image = img
+    panel.config(width=img.width(), height=img.height())
+    panel.create_image(0, 0, image=img, anchor=NW)
+
+
+def get_mouse_posn(event):
+    global topy, topx
+
+    topx, topy = event.x, event.y
+
+
+def update_sel_rect(event):
+    global rect_id, panel
+    global topy, topx, botx, boty
+
+    botx, boty = event.x, event.y
+    panel.coords(rect_id, topx, topy, botx, boty)  # Update selection rect.
 
 
 # Äußeres Fenster erstellen
@@ -86,8 +110,14 @@ sqr = Image.open("images/squares.png")
 sqr = sqr.resize((35, 35), Image.ANTIALIAS)
 sqr = ImageTk.PhotoImage(sqr)
 
+# reserviere Speicherplatz für zu bearbeitendes Bild und kopie für reset
+img = ImageTk.PhotoImage(Image.open('images/placeholder.png'))
+ori_img = img
+x = ' '
+
 # Label für Bilddarstellung
-panel = Label(main_frame)
+panel = Canvas(main_frame)
+panel.img = img
 
 # Buttons für Effekte erstellen
 title_font = font.Font(family='Arial', size=16, weight='bold')
@@ -138,11 +168,6 @@ help_menu.add_command(label="Tutorial", command=func_gui.help_tut)
 menu.add_cascade(label="Hilfe", menu=help_menu)
 
 root.config(menu=menu)
-
-# reserviere Speicherplatz für zu bearbeitendes Bild und kopie für reset
-img = ImageTk.PhotoImage(Image.open('images/placeholder.png'))
-ori_img = img
-x = ' '
 
 # Schleife die auf Nutzerinput wartet
 root.mainloop()

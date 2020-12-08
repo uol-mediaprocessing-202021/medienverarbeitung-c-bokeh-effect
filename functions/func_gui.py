@@ -23,12 +23,12 @@ def help_tut():
 
 
 # Konvertiere PIL.ImageTk aus Label in ein PIL.Image
-def covert_imgtk2img(label):
-    width, height = label.image._PhotoImage__size
+def covert_imgtk2img(img):
+    width, height = img._PhotoImage__size
     rgb = np.empty((height, width, 3))
     for j in range(height):
         for i in range(width):
-            rgb[j, i, :] = label.image._PhotoImage__photo.get(x=i, y=j)
+            rgb[j, i, :] = img._PhotoImage__photo.get(x=i, y=j)
 
     new_img = Image.fromarray(rgb.astype('uint8'))
     # new_img = new_img.convert("RGBA")

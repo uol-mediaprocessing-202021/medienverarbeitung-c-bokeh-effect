@@ -11,7 +11,9 @@ rect_id = None
 
 # Bilder öffnen
 def open_image():
-    global img, ori_img, panel, file_menu, x, info_label, rect_id
+    global img, ori_img, x, rect_id
+    global panel, file_menu, info_label
+    global auto_mode, focus_mode
 
     # Bild laden und in canvas (panel) speichern
     x = filedialog.askopenfilename(title='Bild öffnen')
@@ -22,14 +24,12 @@ def open_image():
     panel.create_image(0, 0, image=img, anchor=NW)
     panel.place(anchor="center", relx=0.5, rely=0.5)
 
-    # Fokusbereich initialisieren
-    rect_id = panel.create_rectangle(topx, topy, topx, topy, dash=(20, 20), fill='', outline='white')
-    panel.bind('<Button-1>', get_mouse_posn)
-    panel.bind('<B1-Motion>', update_sel_rect)
-
     # infoleiste updaten und speichern unter ermöglichen
     info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
+
     file_menu.entryconfig("Speichern unter ...", state="normal")
+    auto_mode.config(state="normal", background="#23272a")
+    focus_mode.config(state="normal")
 
 
 # Bilder speichern
@@ -37,11 +37,11 @@ def save_image():
     global img, panel, x
 
     y = filedialog.asksaveasfilename(title='Bild speichern unter', filetypes=(
-                ("PNG Datei (*.png)", "*.png"),
-                ("JPEG Datei (*.jpeg)", "*.jpeg"),
-                ("GIF Datei (*.gif)", "*.gif"),
-                ("Alle Dateien", "*.*"),
-            ), defaultextension='.png', initialfile=os.path.basename(x))
+        ("PNG Datei (*.png)", "*.png"),
+        ("JPEG Datei (*.jpeg)", "*.jpeg"),
+        ("GIF Datei (*.gif)", "*.gif"),
+        ("Alle Dateien", "*.*"),
+    ), defaultextension='.png', initialfile=os.path.basename(x))
 
     new_image = func_gui.covert_imgtk2img(img)
     new_image.save(y)
@@ -56,6 +56,9 @@ def gauss():
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
+    auto_mode.config(state="disabled", background="#2c2f33")
+    focus_mode.config(state="disabled", background="#2c2f33")
+
 
 # setzt das Bild zum Ursprung zurück
 def reset():
@@ -63,7 +66,10 @@ def reset():
     img = ori_img
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
-    reset_sel_rect()
+    activate_auto_mode()
+
+    auto_mode.config(state="normal")
+    focus_mode.config(state="normal")
 
 
 # trackt Maus position
@@ -79,16 +85,30 @@ def update_sel_rect(event):
     global topy, topx, botx, boty
 
     botx, boty = event.x, event.y
-    panel.coords(rect_id, topx, topy, botx, boty)  # Update selection rect.
+    panel.coords(rect_id, topx, topy, botx, boty)
 
 
-# reset Fokusbereich zu 0
-def reset_sel_rect():
+# wechsel zu fokus Modus
+def activate_focus_mode():
     global rect_id, panel
     panel.delete(rect_id)
     rect_id = panel.create_rectangle(topx, topy, topx, topy, dash=(20, 20), fill='', outline='white')
     panel.bind('<Button-1>', get_mouse_posn)
     panel.bind('<B1-Motion>', update_sel_rect)
+
+    auto_mode.config(background="#2c2f33")
+    focus_mode.config(background="#23272a")
+
+
+# wechsel zum Auto Modus
+def activate_auto_mode():
+    global rect_id, panel
+    global topy, topx, botx, boty
+
+    panel.delete(rect_id)
+
+    auto_mode.config(background="#23272a")
+    focus_mode.config(background="#2c2f33")
 
 
 # Äußeres Fenster erstellen
@@ -98,40 +118,27 @@ root.title("Bokeh Effekt")
 root.config(background="#99aab5")
 
 # Innere Fenster erstellen
-info_frame = Frame(root, width=700, height=20, background="#23272a")
+info_frame = Frame(root, width=720, height=20, background="#23272a")
 info_frame.pack(side=BOTTOM, fill=BOTH)
 
-tool_frame = Frame(root, width=200, background="#2c2f33")
+tool_frame = Frame(root, width=220, background="#2c2f33")
 tool_frame.pack(side=LEFT, fill=BOTH)
 
 main_frame = Frame(root, width=500, height=500, background="#3a3e43")
 main_frame.pack(side=LEFT, fill=BOTH, expand=True)
 
 # Icons für Buttons laden
-noe = Image.open("images/nothing.png")
-noe = noe.resize((35, 35), Image.ANTIALIAS)
-noe = ImageTk.PhotoImage(noe)
-
-ring = Image.open("images/rings.png")
-ring = ring.resize((35, 35), Image.ANTIALIAS)
-ring = ImageTk.PhotoImage(ring)
-
-star = Image.open("images/stars.png")
-star = star.resize((35, 35), Image.ANTIALIAS)
-star = ImageTk.PhotoImage(star)
-
-sqr = Image.open("images/squares.png")
-sqr = sqr.resize((35, 35), Image.ANTIALIAS)
-sqr = ImageTk.PhotoImage(sqr)
-
-res = Image.open("images/reset.png")
-res = res.resize((35, 35), Image.ANTIALIAS)
-res = ImageTk.PhotoImage(res)
+noe = ImageTk.PhotoImage(Image.open("images/nothing.png").resize((35, 35), Image.ANTIALIAS))
+ring = ImageTk.PhotoImage(Image.open("images/rings.png").resize((35, 35), Image.ANTIALIAS))
+star = ImageTk.PhotoImage(Image.open("images/stars.png").resize((35, 35), Image.ANTIALIAS))
+sqr = ImageTk.PhotoImage(Image.open("images/squares.png").resize((35, 35), Image.ANTIALIAS))
+foc = ImageTk.PhotoImage(Image.open("images/focus.png").resize((35, 35), Image.ANTIALIAS))
+auto = ImageTk.PhotoImage(Image.open("images/auto.png").resize((35, 35), Image.ANTIALIAS))
 
 # reserviere Speicherplatz für zu bearbeitendes Bild und kopie für reset
-img = ImageTk.PhotoImage(Image.open('images/placeholder.png'))
+x = 'images/placeholder.png'
+img = ImageTk.PhotoImage(Image.open(x))
 ori_img = img
-x = ' '
 
 # Label für Bilddarstellung
 panel = Canvas(main_frame)
@@ -145,23 +152,33 @@ options_label.pack(pady=10)
 
 no_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                    command=reset)
-no_button.pack(padx=35, pady=35, fill=BOTH)
+no_button.pack(padx=25, pady=25, fill=BOTH)
 
 ring_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                      command=gauss)
-ring_button.pack(padx=35, pady=35, fill=BOTH)
+ring_button.pack(padx=25, pady=25, fill=BOTH)
 
 star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                      command=gauss)
-star_button.pack(padx=35, pady=35, fill=BOTH)
+star_button.pack(padx=25, pady=25, fill=BOTH)
 
 square_button = Button(tool_frame, image=sqr, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                        command=gauss)
-square_button.pack(padx=35, pady=35, fill=BOTH)
+square_button.pack(padx=25, pady=25, fill=BOTH)
 
-fokus_reset = Button(tool_frame, image=res, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                     font=title_font, fg="white", command=reset_sel_rect)
-fokus_reset.pack(padx=35, pady=35, fill=BOTH, side=BOTTOM)
+# Buttons für Modi erstellen
+focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                    font=title_font, fg="white", command=activate_focus_mode, state=DISABLED, relief="sunken",
+                    height=40, width=40)
+focus_mode.pack(side=BOTTOM, padx=25, pady=25, fill=BOTH)
+
+auto_mode = Button(tool_frame, image=auto, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                   font=title_font, fg="white", state=DISABLED, command=activate_auto_mode, relief="sunken",
+                   height=40, width=40)
+auto_mode.pack(side=BOTTOM, padx=25, pady=25, fill=BOTH)
+
+options_label = Label(tool_frame, text="Modi", background="#2c2f33", fg="white", font=title_font)
+options_label.pack(pady=10, side=BOTTOM)
 
 # label für Bildinfo erstellen
 info_label = Label(info_frame, background="#23272a", fg="white")

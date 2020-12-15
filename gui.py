@@ -1,6 +1,7 @@
 from tkinter import *
 import tkinter.font as font
 from functions import func_gui
+from detection import blur
 from PIL import Image, ImageTk, ImageFilter
 from tkinter import filedialog
 import os
@@ -53,6 +54,18 @@ def gauss():
     g_img = func_gui.covert_imgtk2img(img)
     img = g_img.filter(ImageFilter.GaussianBlur(radius=5))
     img = ImageTk.PhotoImage(img)
+    panel.config(width=img.width(), height=img.height())
+    panel.create_image(0, 0, image=img, anchor=NW)
+
+    auto_mode.config(state="disabled", background="#2c2f33")
+    focus_mode.config(state="disabled", background="#2c2f33")
+
+
+# bearbeitet Bild mit PyTorch (TODO Unschärfeobjekte)
+def circle():
+    global x, img
+    c_img = blur.torch_blur(x)
+    img = ImageTk.PhotoImage(Image.fromarray(c_img))
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
@@ -155,7 +168,7 @@ no_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, a
 no_button.pack(padx=25, pady=25, fill=BOTH)
 
 ring_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                     command=gauss)
+                     command=circle)
 ring_button.pack(padx=25, pady=25, fill=BOTH)
 
 star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",

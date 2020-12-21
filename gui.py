@@ -6,7 +6,6 @@ from detection import torch
 from PIL import Image, ImageTk
 from tkinter import filedialog
 import os
-import cv2
 
 topx, topy, botx, boty = 0, 0, 0, 0
 rect_id = None
@@ -42,9 +41,8 @@ def save_image():
     y = filedialog.asksaveasfilename(title='Bild speichern unter', filetypes=(
         ("PNG Datei (*.png)", "*.png"),
         ("JPEG Datei (*.jpeg)", "*.jpeg"),
-        ("GIF Datei (*.gif)", "*.gif"),
         ("Alle Dateien", "*.*"),
-    ), defaultextension='.png', initialfile=os.path.basename(x))
+    ), defaultextension=os.path.splitext(x), initialfile=os.path.basename(x))
 
     new_image = func_gui.covert_imgtk2img(img)
     new_image.save(y)

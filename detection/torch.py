@@ -21,7 +21,6 @@ def torch_blur(source):
     prediction = model([channels_first])[0]
     masks = prediction['masks'].detach().numpy()
     mask = masks[0][0]
-    cv2.imshow('mask', mask)
 
     inverted = np.abs(1. - mask)
 
@@ -29,10 +28,9 @@ def torch_blur(source):
     mr = r * mask
     mg = g * mask
     mb = b * mask
-    cv2.imshow('mr', mr)
+
     subject = cv2.merge((mr, mg, mb))
     subject = np.asarray(subject * 255., dtype='uint8')
-    cv2.imshow('image', subject)
 
     ir = r * inverted
     ig = g * inverted

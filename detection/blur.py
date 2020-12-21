@@ -19,7 +19,7 @@ def bokeh(image):
     ], dtype='float')
 
     mask = triangle
-    kernel = cv2.getGaussianKernel(11, 20)
+    kernel = cv2.getGaussianKernel(11, 10)
     kernel = kernel * kernel.transpose() * mask
     kernel = kernel / np.sum(kernel)
 

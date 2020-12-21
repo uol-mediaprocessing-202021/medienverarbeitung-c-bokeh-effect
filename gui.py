@@ -1,10 +1,12 @@
 from tkinter import *
 import tkinter.font as font
 from functions import func_gui
-from detection import blur
-from PIL import Image, ImageTk, ImageFilter
+from detection import pool
+from detection import torch
+from PIL import Image, ImageTk
 from tkinter import filedialog
 import os
+import cv2
 
 topx, topy, botx, boty = 0, 0, 0, 0
 rect_id = None
@@ -48,12 +50,11 @@ def save_image():
     new_image.save(y)
 
 
-# bearbeitet Bild mit Gauss Filter (zum test)
-def gauss():
-    global panel, img
-    g_img = func_gui.covert_imgtk2img(img)
-    img = g_img.filter(ImageFilter.GaussianBlur(radius=5))
-    img = ImageTk.PhotoImage(img)
+# bearbeitet Bild mit Torch
+def st():
+    global x, img
+    s_img = torch.torch_blur(x)
+    img = ImageTk.PhotoImage(Image.fromarray(s_img))
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
@@ -61,10 +62,10 @@ def gauss():
     focus_mode.config(state="disabled", background="#2c2f33")
 
 
-# bearbeitet Bild mit PyTorch (TODO Unschärfeobjekte)
+# bearbeitet Bild mit Pool_Net
 def circle():
     global x, img
-    c_img = blur.torch_blur(x)
+    c_img = pool.pool(x)
     img = ImageTk.PhotoImage(Image.fromarray(c_img))
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
@@ -172,11 +173,10 @@ ring_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0
 ring_button.pack(padx=25, pady=25, fill=BOTH)
 
 star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                     command=gauss)
+                     command=st)
 star_button.pack(padx=25, pady=25, fill=BOTH)
 
-square_button = Button(tool_frame, image=sqr, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                       command=gauss)
+square_button = Button(tool_frame, image=sqr, background="#2c2f33", borderwidth=0, activebackground="#2c2f33")
 square_button.pack(padx=25, pady=25, fill=BOTH)
 
 # Buttons für Modi erstellen

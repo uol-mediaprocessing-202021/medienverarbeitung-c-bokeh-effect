@@ -1,45 +1,5 @@
 import cv2
 import numpy as np
-from pool_net import PoolNetInterface
-
-
-def torch_blur(source):
-
-    img = cv2.imread(source)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    weight_path = "model/no_edge_model.ckpt"
-
-    # Load model
-    model = PoolNetInterface(weight_path, device="gpu")
-
-    # Call function
-    mask = model.process(source)
-
-    img = img / 255.  # Normalize image
-
-    cv2.imshow('mask', mask)
-
-    inverted = np.abs(1. - mask)
-
-    r, g, b = cv2.split(img)
-    mr = r * mask
-    mg = g * mask
-    mb = b * mask
-    subject = cv2.merge((mr, mg, mb))
-
-    ir = r * inverted
-    ig = g * inverted
-    ib = b * inverted
-    background = cv2.merge((ir, ig, ib))
-
-    subject = np.asarray(subject * 255., dtype='uint8')
-
-    background_bokeh = bokeh(np.asarray(background * 255, dtype='uint8'))
-    background_bokeh = np.asarray(background_bokeh * 255, dtype='uint8')
-    combined = cv2.addWeighted(subject, 1., background_bokeh, 1., 0)
-
-    return combined
 
 
 def bokeh(image):
@@ -59,8 +19,8 @@ def bokeh(image):
     ], dtype='float')
 
     mask = triangle
-    kernel = cv2.getGaussianKernel(11, 5)
-    kernel = kernel * kernel.transpose() * mask  # Is the 2D filter
+    kernel = cv2.getGaussianKernel(11, 20)
+    kernel = kernel * kernel.transpose() * mask
     kernel = kernel / np.sum(kernel)
 
     r, g, b = cv2.split(image)

@@ -14,13 +14,13 @@ def apply_mask(img, mask):
     return np.asarray(result * 255., dtype='uint8')
 
 
-def pool(source):
+def pool(source, use_scale):
     ssl._create_default_https_context = ssl._create_unverified_context
 
     img = cv2.imread(source)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    mask = predict(img)
+    mask = predict(img, use_scale)
     mask = mask / 255
     mask_inverted = np.abs(1. - mask)
 
@@ -57,11 +57,13 @@ def compress_image(img):
 
 
 # Prediction mit PoolNET
-def predict(img):
+def predict(img, use_scale):
     image = np.copy(img)
-    height, width = image.shape[:2]
-    if height > 500 or width > 500:
-        image = compress_image(img)
+    if use_scale == 0:
+        height, width = image.shape[:2]
+        if height > 500 or width > 500:
+            image = compress_image(img)
+
     image_numpy = np.array(image, dtype=np.float32)
     image_numpy = image_numpy.transpose((2, 0, 1))
     image_tensor = torch.Tensor(image_numpy)

@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter.ttk import Progressbar
 import tkinter.font as font
 from functions import func_gui
 from detection import pool
@@ -49,31 +50,32 @@ def save_image():
 
 
 # bearbeitet Bild mit Torch
-def st():
-    global x, img
-    s_img = torch.torch_blur(x)
-    img = ImageTk.PhotoImage(Image.fromarray(s_img))
+def blur():
+    global x, img, edge_var, scale_var, info_frame, version_label
+
+    version_label.config(text=" ")
+    progress_bar = Progressbar(info_frame, orient=HORIZONTAL, length=100, mode='indeterminate')
+    progress_bar.pack(side=LEFT, pady=2)
+    func_gui.bar(progress_bar, info_frame)
+
+    if edge_var.get() == 0:
+        blur_img = pool.pool(x, scale_var.get())
+    else:
+        blur_img = torch.torch_blur(x)
+
+    img = ImageTk.PhotoImage(Image.fromarray(blur_img))
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
-    auto_mode.config(state="disabled", background="#2c2f33")
-    focus_mode.config(state="disabled", background="#2c2f33")
-
-
-# bearbeitet Bild mit Pool_Net
-def circle():
-    global x, img
-    c_img = pool.pool(x)
-    img = ImageTk.PhotoImage(Image.fromarray(c_img))
-    panel.config(width=img.width(), height=img.height())
-    panel.create_image(0, 0, image=img, anchor=NW)
+    progress_bar.destroy()
+    version_label.config(text="Version: Alpha 0.01")
 
     auto_mode.config(state="disabled", background="#2c2f33")
     focus_mode.config(state="disabled", background="#2c2f33")
 
 
 # setzt das Bild zum Ursprung zurück
-def reset():
+def reset_image():
     global panel, img, ori_img
     img = ori_img
     panel.config(width=img.width(), height=img.height())
@@ -82,6 +84,13 @@ def reset():
 
     auto_mode.config(state="normal")
     focus_mode.config(state="normal")
+
+
+# setzt Einstellungen zurück
+def reset_setup():
+    global edge_var, scale_var
+    edge_var.set(0)
+    scale_var.set(0)
 
 
 # trackt Maus position
@@ -130,7 +139,7 @@ root.title("Bokeh Effekt")
 root.config(background="#99aab5")
 
 # Innere Fenster erstellen
-info_frame = Frame(root, width=720, height=20, background="#23272a")
+info_frame = Frame(root, width=720, height=30, background="#23272a")
 info_frame.pack(side=BOTTOM, fill=BOTH)
 
 tool_frame = Frame(root, width=220, background="#2c2f33")
@@ -163,18 +172,19 @@ options_label = Label(tool_frame, text="Effekte", background="#2c2f33", fg="whit
 options_label.pack(pady=10)
 
 no_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                   command=reset)
+                   command=reset_image)
 no_button.pack(padx=25, pady=25, fill=BOTH)
 
 ring_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                     command=circle)
+                     command=blur)
 ring_button.pack(padx=25, pady=25, fill=BOTH)
 
 star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                     command=st)
+                     command=blur)
 star_button.pack(padx=25, pady=25, fill=BOTH)
 
-square_button = Button(tool_frame, image=sqr, background="#2c2f33", borderwidth=0, activebackground="#2c2f33")
+square_button = Button(tool_frame, image=sqr, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                       command=blur)
 square_button.pack(padx=25, pady=25, fill=BOTH)
 
 # Buttons für Modi erstellen
@@ -193,8 +203,9 @@ options_label.pack(pady=10, side=BOTTOM)
 
 # label für Bildinfo erstellen
 info_label = Label(info_frame, background="#23272a", fg="white")
-info_label.pack(side=RIGHT)
-version_label = Label(info_frame, background="#23272a", text="Version: Alpha 0.01", fg="white").pack(side=LEFT)
+info_label.pack(side=RIGHT, padx=2, pady=5)
+version_label = Label(info_frame, background="#23272a", text="Version: Alpha 0.01", fg="white")
+version_label.pack(side=LEFT, padx=2, pady=5)
 
 # Menü erstellen
 menu = Menu(root)
@@ -202,6 +213,10 @@ menu = Menu(root)
 # Reiter für das Menü erstellen
 file_menu = Menu(menu, tearoff=0)
 help_menu = Menu(menu, tearoff=0)
+setup_menu = Menu(menu, tearoff=0)
+
+edge_menu = Menu(setup_menu, tearoff=0)
+scale_menu = Menu(setup_menu, tearoff=0)
 
 # Unterreiter für 'Datei'
 file_menu.add_command(label="Neu ...")
@@ -210,6 +225,23 @@ file_menu.add_command(label="Speichern unter ...", command=save_image, state="di
 file_menu.add_separator()
 file_menu.add_command(label="Beenden", command=root.quit)
 menu.add_cascade(label="Datei", menu=file_menu)
+
+# Unterreiter für 'Einstellungen'
+edge_var = IntVar()
+edge_menu.add_radiobutton(label="PyTorch with PoolNET", value=0, variable=edge_var)
+edge_menu.add_radiobutton(label="PyTorch only", value=1, variable=edge_var)
+edge_var.set(0)
+setup_menu.add_cascade(label="Kantenerkennung", menu=edge_menu)
+
+scale_var = IntVar()
+scale_menu.add_radiobutton(label="An", value=0, variable=scale_var)
+scale_menu.add_radiobutton(label="Aus", value=1, variable=scale_var)
+scale_var.set(0)
+setup_menu.add_cascade(label="Maske skalieren", menu=scale_menu)
+
+setup_menu.add_separator()
+setup_menu.add_command(label="Einstellungen zurücksetzen", command=reset_setup)
+menu.add_cascade(label="Einstellungen", menu=setup_menu)
 
 # Unterreiter für 'Hilfe'
 help_menu.add_command(label="Über das Projekt", command=func_gui.help_about)

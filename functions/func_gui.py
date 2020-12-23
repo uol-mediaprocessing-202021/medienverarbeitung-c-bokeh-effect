@@ -33,3 +33,53 @@ def covert_imgtk2img(img):
     new_img = Image.fromarray(rgb.astype('uint8'))
     # new_img = new_img.convert("RGBA")
     return new_img
+
+
+# Function responsible for the updation
+# of the progress bar value
+def bar(progress, frame):
+    import time
+    progress['value'] = 20
+    frame.update_idletasks()
+    time.sleep(0.5)
+
+    progress['value'] = 40
+    frame.update_idletasks()
+    time.sleep(0.5)
+
+    progress['value'] = 50
+    frame.update_idletasks()
+    time.sleep(0.5)
+
+    progress['value'] = 60
+    frame.update_idletasks()
+    time.sleep(0.5)
+
+    progress['value'] = 80
+    frame.update_idletasks()
+    time.sleep(0.5)
+
+    progress['value'] = 100
+    frame.update_idletasks()
+    time.sleep(0.5)
+
+    progress['value'] = 80
+    frame.update_idletasks()
+    time.sleep(0.5)
+
+    progress['value'] = 60
+    frame.update_idletasks()
+    time.sleep(0.5)
+
+    progress['value'] = 50
+    frame.update_idletasks()
+    time.sleep(0.5)
+
+    progress['value'] = 40
+    frame.update_idletasks()
+    time.sleep(0.5)
+
+    progress['value'] = 20
+    frame.update_idletasks()
+    time.sleep(0.5)
+    progress['value'] = 0

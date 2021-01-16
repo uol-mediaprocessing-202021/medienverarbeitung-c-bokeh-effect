@@ -6,7 +6,9 @@ from detection import pool
 from detection import torch
 from PIL import Image, ImageTk
 from tkinter import filedialog
+from queue import Queue
 import os
+import time
 
 topx, topy, botx, boty = 0, 0, 0, 0
 rect_id = None
@@ -53,21 +55,26 @@ def save_image():
 def blur():
     global x, img, edge_var, scale_var, info_frame, version_label
 
+    que = Queue()
+    try:
+        image_thread = func_gui.IPThread(1, "IP_Thread", edge_var.get(), x, scale_var.get(), que)
+        image_thread.start()
+    except KeyboardInterrupt:
+        print("[MAIN][Error] unable to start ObstacleDetection_Thread")
+        time.sleep(1)
+
     version_label.config(text=" ")
-    progress_bar = Progressbar(info_frame, orient=HORIZONTAL, length=100, mode='indeterminate')
-    progress_bar.pack(side=LEFT, pady=2)
-    func_gui.bar(progress_bar, info_frame)
+    progress = Progressbar(info_frame, orient=HORIZONTAL, length=100, mode='indeterminate')
+    progress.pack(side=LEFT, pady=2)
+    func_gui.bar(progress, info_frame)
 
-    if edge_var.get() == 0:
-        blur_img = pool.pool(x, scale_var.get())
-    else:
-        blur_img = torch.torch_blur(x)
-
+    blur_img = que.get()
     img = ImageTk.PhotoImage(Image.fromarray(blur_img))
+
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
-    progress_bar.destroy()
+    progress.destroy()
     version_label.config(text="Version: Alpha 0.01")
 
     auto_mode.config(state="disabled", background="#2c2f33")

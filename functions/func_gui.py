@@ -1,7 +1,11 @@
 from tkinter import messagebox
 from PIL import Image
+from functions import global_vars
+from detection import pool
+from detection import torch
 import numpy as np
 import time
+import threading
 
 
 # Text für Punkt 'Über das Projekt' im Reiter Hilfe
@@ -40,81 +44,49 @@ def covert_imgtk2img(img):
 # of the progress bar value
 def bar(progress, frame):
 
-    progress['value'] = 10
-    frame.update_idletasks()
-    time.sleep(0.1)
+    while not global_vars.progress_bar_check:
+        for x in [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+            if not global_vars.progress_bar_check:
+                progress['value'] = x
+                frame.update_idletasks()
+                time.sleep(0.1)
+            else:
+                break
 
-    progress['value'] = 20
-    frame.update_idletasks()
-    time.sleep(0.1)
+        for y in [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0]:
+            if not global_vars.progress_bar_check:
+                progress['value'] = y
+                frame.update_idletasks()
+                time.sleep(0.1)
+            else:
+                break
 
-    progress['value'] = 30
-    frame.update_idletasks()
-    time.sleep(0.1)
 
-    progress['value'] = 40
-    frame.update_idletasks()
-    time.sleep(0.1)
+# Class for ImageProcessing_Thread
+class IPThread(threading.Thread):
+    def __init__(self, thread_id, name, edge_var, x, scale_var, que):
+        threading.Thread.__init__(self)
+        self.threadID = thread_id
+        self.name = name
+        self.edge_var = edge_var
+        self.x = x
+        self.scale_var = scale_var
+        self.que = que
 
-    progress['value'] = 50
-    frame.update_idletasks()
-    time.sleep(0.1)
+    def run(self):
+        print("\n[LDThread][INFO] starting " + self.name + "\n")
+        time.sleep(0.5)
+        self.que.put(process_image(self.edge_var, self.x, self.scale_var))
 
-    progress['value'] = 60
-    frame.update_idletasks()
-    time.sleep(0.1)
 
-    progress['value'] = 70
-    frame.update_idletasks()
-    time.sleep(0.1)
+def process_image(edge_var, x, scale_var):
 
-    progress['value'] = 80
-    frame.update_idletasks()
-    time.sleep(0.1)
+    if edge_var == 0:
+        blur_img = pool.pool(x, scale_var)
+        global_vars.progress_bar_check = True
+        return blur_img
+    else:
+        blur_img = torch.torch_blur(x)
+        global_vars.progress_bar_check = True
+        return blur_img
 
-    progress['value'] = 90
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 100
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 90
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 80
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 70
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 60
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 50
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 40
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 30
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 20
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 10
-    frame.update_idletasks()
-    time.sleep(0.1)
-
-    progress['value'] = 0
-    frame.update_idletasks()

@@ -155,12 +155,13 @@ main_frame = Frame(root, width=500, height=500, background="#3a3e43")
 main_frame.pack(side=LEFT, fill=BOTH, expand=True)
 
 # Icons für Buttons laden
-noe = ImageTk.PhotoImage(Image.open("images/nothing.png").resize((35, 35), Image.ANTIALIAS))
-ring = ImageTk.PhotoImage(Image.open("images/rings.png").resize((35, 35), Image.ANTIALIAS))
-star = ImageTk.PhotoImage(Image.open("images/stars.png").resize((35, 35), Image.ANTIALIAS))
-sqr = ImageTk.PhotoImage(Image.open("images/squares.png").resize((35, 35), Image.ANTIALIAS))
-foc = ImageTk.PhotoImage(Image.open("images/focus.png").resize((35, 35), Image.ANTIALIAS))
-auto = ImageTk.PhotoImage(Image.open("images/auto.png").resize((35, 35), Image.ANTIALIAS))
+noe = ImageTk.PhotoImage(Image.open("images/tool_icons/revert.png").resize((35, 35), Image.ANTIALIAS))
+ring = ImageTk.PhotoImage(Image.open("images/tool_icons/circles.png").resize((35, 35), Image.ANTIALIAS))
+star = ImageTk.PhotoImage(Image.open("images/tool_icons/stars.png").resize((35, 35), Image.ANTIALIAS))
+hexa = ImageTk.PhotoImage(Image.open("images/tool_icons/hexa.png").resize((35, 30), Image.ANTIALIAS))
+heart = ImageTk.PhotoImage(Image.open("images/tool_icons/hearts.png").resize((35, 35), Image.ANTIALIAS))
+foc = ImageTk.PhotoImage(Image.open("images/mode_icons/focus.png").resize((35, 35), Image.ANTIALIAS))
+auto = ImageTk.PhotoImage(Image.open("images/mode_icons/auto.png").resize((35, 35), Image.ANTIALIAS))
 
 # reserviere Speicherplatz für zu bearbeitendes Bild und kopie für reset
 x = 'images/placeholder.png'
@@ -177,21 +178,25 @@ title_font = font.Font(family='Arial', size=16, weight='bold')
 options_label = Label(tool_frame, text="Effekte", background="#2c2f33", fg="white", font=title_font)
 options_label.pack(pady=10)
 
-no_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                   command=reset_image)
-no_button.pack(padx=25, pady=25, fill=BOTH)
+revert_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                       command=reset_image)
+revert_button.pack(padx=25, pady=25, fill=BOTH)
 
-ring_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                     command=blur)
-ring_button.pack(padx=25, pady=25, fill=BOTH)
+circle_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                       command=blur)
+circle_button.pack(padx=25, pady=25, fill=BOTH)
 
 star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                      command=blur)
 star_button.pack(padx=25, pady=25, fill=BOTH)
 
-square_button = Button(tool_frame, image=sqr, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                       command=blur)
-square_button.pack(padx=25, pady=25, fill=BOTH)
+hex_button = Button(tool_frame, image=hexa, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                    command=blur)
+hex_button.pack(padx=25, pady=25, fill=BOTH)
+
+heart_button = Button(tool_frame, image=heart, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                      command=blur)
+heart_button.pack(padx=25, pady=25, fill=BOTH)
 
 # Buttons für Modi erstellen
 focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",

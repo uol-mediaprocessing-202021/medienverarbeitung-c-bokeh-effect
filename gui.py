@@ -2,8 +2,7 @@ from tkinter import *
 from tkinter.ttk import Progressbar
 import tkinter.font as font
 from functions import func_gui
-from detection import pool
-from detection import torch
+from functions import global_vars
 from PIL import Image, ImageTk
 from tkinter import filedialog
 from queue import Queue
@@ -57,25 +56,25 @@ def blur():
 
     que = Queue()
     try:
-        image_thread = func_gui.IPThread(1, "IP_Thread", edge_var.get(), x, scale_var.get(), que)
+        image_thread = func_gui.IPThread(edge_var.get(), x, scale_var.get(), que)
         image_thread.start()
     except KeyboardInterrupt:
-        print("[MAIN][Error] unable to start ObstacleDetection_Thread")
+        print("[Error] unable to start ImageProcessing_Thread")
         time.sleep(1)
 
     version_label.config(text=" ")
-    progress = Progressbar(info_frame, orient=HORIZONTAL, length=100, mode='indeterminate')
-    progress.pack(side=LEFT, pady=2)
+    progress = Progressbar(info_frame, orient=HORIZONTAL, length=75, mode='indeterminate')
+    progress.pack(side=LEFT)
     func_gui.bar(progress, info_frame)
 
-    blur_img = que.get()
-    img = ImageTk.PhotoImage(Image.fromarray(blur_img))
+    if not que.empty():
+        img = ImageTk.PhotoImage(Image.fromarray(que.get()))
 
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
     progress.destroy()
-    version_label.config(text="Version: Alpha 0.01")
+    version_label.config(text="Version: " + global_vars.version)
 
     auto_mode.config(state="disabled", background="#2c2f33")
     focus_mode.config(state="disabled", background="#2c2f33")
@@ -146,10 +145,10 @@ root.title("Bokeh Effekt")
 root.config(background="#99aab5")
 
 # Innere Fenster erstellen
-info_frame = Frame(root, width=720, height=30, background="#23272a")
+info_frame = Frame(root, width=750, height=30, background="#23272a")
 info_frame.pack(side=BOTTOM, fill=BOTH)
 
-tool_frame = Frame(root, width=220, background="#2c2f33")
+tool_frame = Frame(root, width=250, background="#2c2f33")
 tool_frame.pack(side=LEFT, fill=BOTH)
 
 main_frame = Frame(root, width=500, height=500, background="#3a3e43")
@@ -211,7 +210,7 @@ options_label.pack(pady=10, side=BOTTOM)
 # label für Bildinfo erstellen
 info_label = Label(info_frame, background="#23272a", fg="white")
 info_label.pack(side=RIGHT, padx=2, pady=5)
-version_label = Label(info_frame, background="#23272a", text="Version: Alpha 0.01", fg="white")
+version_label = Label(info_frame, background="#23272a", text="Version: " + global_vars.version, fg="white")
 version_label.pack(side=LEFT, padx=2, pady=5)
 
 # Menü erstellen
@@ -235,8 +234,8 @@ menu.add_cascade(label="Datei", menu=file_menu)
 
 # Unterreiter für 'Einstellungen'
 edge_var = IntVar()
-edge_menu.add_radiobutton(label="PyTorch with PoolNET", value=0, variable=edge_var)
-edge_menu.add_radiobutton(label="PyTorch only", value=1, variable=edge_var)
+edge_menu.add_radiobutton(label="PyTorch mit PoolNET", value=0, variable=edge_var)
+edge_menu.add_radiobutton(label="nur PyTorch", value=1, variable=edge_var)
 edge_var.set(0)
 setup_menu.add_cascade(label="Kantenerkennung", menu=edge_menu)
 

@@ -64,23 +64,19 @@ def bar(progress, frame):
 
 # Class for ImageProcessing_Thread
 class IPThread(threading.Thread):
-    def __init__(self, thread_id, name, edge_var, x, scale_var, que):
+    def __init__(self, edge_var, x, scale_var, que):
         threading.Thread.__init__(self)
-        self.threadID = thread_id
-        self.name = name
         self.edge_var = edge_var
         self.x = x
         self.scale_var = scale_var
         self.que = que
 
     def run(self):
-        print("\n[LDThread][INFO] starting " + self.name + "\n")
         time.sleep(0.5)
         self.que.put(process_image(self.edge_var, self.x, self.scale_var))
 
 
 def process_image(edge_var, x, scale_var):
-
     if edge_var == 0:
         blur_img = pool.pool(x, scale_var)
         global_vars.progress_bar_check = True
@@ -89,4 +85,3 @@ def process_image(edge_var, x, scale_var):
         blur_img = torch.torch_blur(x)
         global_vars.progress_bar_check = True
         return blur_img
-

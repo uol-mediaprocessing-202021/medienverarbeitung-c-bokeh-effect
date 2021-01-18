@@ -6,7 +6,6 @@ from detection import blur
 
 
 def torch_blur(source):
-
     img = cv2.imread(source)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 

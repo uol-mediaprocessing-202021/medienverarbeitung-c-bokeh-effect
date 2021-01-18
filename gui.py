@@ -76,6 +76,8 @@ def blur():
     progress.destroy()
     version_label.config(text="Version: " + global_vars.version)
 
+    global_vars.progress_bar_check = False
+
     auto_mode.config(state="disabled", background="#2c2f33")
     focus_mode.config(state="disabled", background="#2c2f33")
 

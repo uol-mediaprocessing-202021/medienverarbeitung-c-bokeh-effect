@@ -234,8 +234,8 @@ menu.add_cascade(label="Datei", menu=file_menu)
 
 # Unterreiter für 'Einstellungen'
 edge_var = IntVar()
-edge_menu.add_radiobutton(label="PyTorch mit PoolNET", value=0, variable=edge_var)
-edge_menu.add_radiobutton(label="nur PyTorch", value=1, variable=edge_var)
+edge_menu.add_radiobutton(label="PoolNET", value=0, variable=edge_var)
+edge_menu.add_radiobutton(label="R-CNN", value=1, variable=edge_var)
 edge_var.set(0)
 setup_menu.add_cascade(label="Kantenerkennung", menu=edge_menu)
 

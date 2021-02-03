@@ -1,17 +1,8 @@
-from detection import blur
+from detection import blur, mask
 import ssl
 import cv2
 import numpy as np
 import torch
-
-
-def apply_mask(img, mask):
-    r, g, b = cv2.split(img)
-    mr = r * mask
-    mg = g * mask
-    mb = b * mask
-    result = cv2.merge((mr, mg, mb))
-    return np.asarray(result * 255., dtype='uint8')
 
 
 def pool(source, use_scale):
@@ -20,17 +11,19 @@ def pool(source, use_scale):
     img = cv2.imread(source)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    mask = predict(img, use_scale)
-    mask = mask / 255
-    mask_inverted = np.abs(1. - mask)
+    pool_mask = predict(img, use_scale)
+    pool_mask = pool_mask / 255
+    mask_inverted = np.abs(1. - pool_mask)
 
-    r, g, b = cv2.split(img)
-    ir = r * mask_inverted
-    ig = g * mask_inverted
-    ib = b * mask_inverted
-    background = cv2.merge((ir, ig, ib))
+    # r, g, b = cv2.split(img)
+    # ir = r * mask_inverted
+    # ig = g * mask_inverted
+    # ib = b * mask_inverted
+    # background = cv2.merge((ir, ig, ib))
 
-    subject = apply_mask(img/255, mask)
+    background = mask.apply_mask(img=img, mask=mask_inverted)
+
+    subject = mask.apply_mask(img/255, mask)
     background_bokeh = blur.bokeh(np.asarray(background, dtype='uint8'))
     background_bokeh = np.asarray(background_bokeh * 255, dtype='uint8')
     result = cv2.addWeighted(subject, 1., background_bokeh, 1., 0)
@@ -40,7 +33,6 @@ def pool(source, use_scale):
 
 def compress_image(img):
     height, width = img.shape[:2]
-    scale_percent = 0
 
     if width > height:
         scale_percent = int(500 * 100 / width)

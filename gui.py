@@ -12,6 +12,9 @@ import os
 import time
 import numpy
 
+topx, topy, botx, boty = 0, 0, 0, 0
+rect_id = None
+
 
 # Bilder öffnen
 def open_image():
@@ -109,10 +112,22 @@ def reset_setup():
 # trackt Maus position
 def get_mouse_posn(event):
     global panel, img, x, sec_edit
+    global topy, topx
+
+    topx, topy = event.x, event.y
+
+
+# updated Fokusbereich
+def update_sel_rect(event):
+    global rect_id, panel, sec_edit
+    global topy, topx, botx, boty
+
+    botx, boty = event.x, event.y
+    panel.coords(rect_id, topx, topy, botx, boty)
 
     original_img = cv2.imread(x)
 
-    sec_edit = slic.edit_segment(original_img, sec_edit, 100, event.y, event.x, True)
+    sec_edit = slic.edit_segment(original_img, sec_edit, 100, topy, topx, botx, boty, True)
 
     img = ImageTk.PhotoImage(Image.fromarray(sec_edit.astype(numpy.uint8)))
 
@@ -127,7 +142,7 @@ def get_mouse_posn(event):
 
 # wechsel zu fokus Modus
 def activate_focus_mode():
-    global panel, img, x, blur_img, sec_edit
+    global panel, img, x, blur_img, sec_edit, rect_id
 
     auto_mode.config(background="#2c2f33")
     focus_mode.config(background="#23272a")
@@ -140,7 +155,10 @@ def activate_focus_mode():
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
+    rect_id = panel.create_rectangle(topx, topy, topx, topy, dash=(20, 20), fill='', outline='white')
+
     panel.bind('<Button-1>', get_mouse_posn)
+    panel.bind('<B1-Motion>', update_sel_rect)
 
 
 # Äußeres Fenster erstellen

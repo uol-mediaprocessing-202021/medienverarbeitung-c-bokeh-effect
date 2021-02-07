@@ -3,19 +3,19 @@ from tkinter.ttk import Progressbar
 import tkinter.font as font
 from functions import func_gui
 from functions import global_vars
+from detection import slic
 from PIL import Image, ImageTk
 from tkinter import filedialog
 from queue import Queue
+import cv2
 import os
 import time
-
-topx, topy, botx, boty = 0, 0, 0, 0
-rect_id = None
+import numpy
 
 
 # Bilder öffnen
 def open_image():
-    global img, ori_img, x, rect_id
+    global img, ori_img, x
     global panel, file_menu, info_label
     global auto_mode, focus_mode
 
@@ -32,8 +32,6 @@ def open_image():
     info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
 
     file_menu.entryconfig("Speichern unter ...", state="normal")
-    auto_mode.config(state="normal", background="#23272a")
-    focus_mode.config(state="normal")
 
 
 # Bilder speichern
@@ -53,6 +51,9 @@ def save_image():
 # bearbeitet Bild mit Torch
 def blur():
     global x, img, edge_var, scale_var, info_frame, version_label
+
+    auto_mode.config(background="#23272a")
+    focus_mode.config(background="#2c2f33")
 
     que = Queue()
     try:
@@ -78,8 +79,8 @@ def blur():
 
     global_vars.progress_bar_check = False
 
-    auto_mode.config(state="disabled", background="#2c2f33")
-    focus_mode.config(state="disabled", background="#2c2f33")
+    auto_mode.config(background="#2c2f33")
+    focus_mode.config(background="#2c2f33")
 
 
 # setzt das Bild zum Ursprung zurück
@@ -88,10 +89,11 @@ def reset_image():
     img = ori_img
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
-    activate_auto_mode()
 
-    auto_mode.config(state="normal")
-    focus_mode.config(state="normal")
+    panel.unbind('<Button-1>')
+
+    auto_mode.config(background="#2c2f33")
+    focus_mode.config(background="#2c2f33")
 
 
 # setzt Einstellungen zurück
@@ -103,41 +105,38 @@ def reset_setup():
 
 # trackt Maus position
 def get_mouse_posn(event):
-    global topy, topx
+    global panel, img, x
 
-    topx, topy = event.x, event.y
+    cv_img = cv2.imread(x)
+    sec_edit = slic.edit_segment(cv_img, 100, event.y, event.x, True)
 
+    img = ImageTk.PhotoImage(Image.fromarray(sec_edit.astype(numpy.uint8)))
 
-# updated Fokusbereich
-def update_sel_rect(event):
-    global rect_id, panel
-    global topy, topx, botx, boty
+    panel.config(width=img.width(), height=img.height())
+    panel.create_image(0, 0, image=img, anchor=NW)
 
-    botx, boty = event.x, event.y
-    panel.coords(rect_id, topx, topy, botx, boty)
+    auto_mode.config(background="#2c2f33")
+    focus_mode.config(background="#2c2f33")
+
+    panel.unbind('<Button-1>')
 
 
 # wechsel zu fokus Modus
 def activate_focus_mode():
-    global rect_id, panel
-    panel.delete(rect_id)
-    rect_id = panel.create_rectangle(topx, topy, topx, topy, dash=(20, 20), fill='', outline='white')
-    panel.bind('<Button-1>', get_mouse_posn)
-    panel.bind('<B1-Motion>', update_sel_rect)
+    global panel, img, x
 
     auto_mode.config(background="#2c2f33")
     focus_mode.config(background="#23272a")
 
+    cv_img = cv2.imread(x)
+    seg = slic.show_segmentation(cv_img, 100)
 
-# wechsel zum Auto Modus
-def activate_auto_mode():
-    global rect_id, panel
-    global topy, topx, botx, boty
+    img = ImageTk.PhotoImage(Image.fromarray(seg.astype(numpy.uint8)))
 
-    panel.delete(rect_id)
+    panel.config(width=img.width(), height=img.height())
+    panel.create_image(0, 0, image=img, anchor=NW)
 
-    auto_mode.config(background="#23272a")
-    focus_mode.config(background="#2c2f33")
+    panel.bind('<Button-1>', get_mouse_posn)
 
 
 # Äußeres Fenster erstellen
@@ -158,10 +157,10 @@ main_frame.pack(side=LEFT, fill=BOTH, expand=True)
 
 # Icons für Buttons laden
 noe = ImageTk.PhotoImage(Image.open("images/tool_icons/revert.png").resize((35, 35), Image.ANTIALIAS))
-ring = ImageTk.PhotoImage(Image.open("images/tool_icons/circles.png").resize((35, 35), Image.ANTIALIAS))
-star = ImageTk.PhotoImage(Image.open("images/tool_icons/stars.png").resize((35, 35), Image.ANTIALIAS))
-hexa = ImageTk.PhotoImage(Image.open("images/tool_icons/hexa.png").resize((35, 30), Image.ANTIALIAS))
-heart = ImageTk.PhotoImage(Image.open("images/tool_icons/hearts.png").resize((35, 35), Image.ANTIALIAS))
+# ring = ImageTk.PhotoImage(Image.open("images/tool_icons/circles.png").resize((35, 35), Image.ANTIALIAS))
+# star = ImageTk.PhotoImage(Image.open("images/tool_icons/stars.png").resize((35, 35), Image.ANTIALIAS))
+# hexa = ImageTk.PhotoImage(Image.open("images/tool_icons/hexa.png").resize((35, 30), Image.ANTIALIAS))
+# heart = ImageTk.PhotoImage(Image.open("images/tool_icons/hearts.png").resize((35, 35), Image.ANTIALIAS))
 foc = ImageTk.PhotoImage(Image.open("images/mode_icons/focus.png").resize((35, 35), Image.ANTIALIAS))
 auto = ImageTk.PhotoImage(Image.open("images/mode_icons/auto.png").resize((35, 35), Image.ANTIALIAS))
 
@@ -184,30 +183,30 @@ revert_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=
                        command=reset_image)
 revert_button.pack(padx=25, pady=25, fill=BOTH)
 
-circle_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                       command=blur)
-circle_button.pack(padx=25, pady=25, fill=BOTH)
+# circle_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+#                      command=blur)
+# circle_button.pack(padx=25, pady=25, fill=BOTH)
 
-star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                     command=blur)
-star_button.pack(padx=25, pady=25, fill=BOTH)
+# star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+#                    command=blur)
+# star_button.pack(padx=25, pady=25, fill=BOTH)
 
-hex_button = Button(tool_frame, image=hexa, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                    command=blur)
-hex_button.pack(padx=25, pady=25, fill=BOTH)
+# hex_button = Button(tool_frame, image=hexa, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+#                   command=blur)
+# hex_button.pack(padx=25, pady=25, fill=BOTH)
 
-heart_button = Button(tool_frame, image=heart, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                      command=blur)
-heart_button.pack(padx=25, pady=25, fill=BOTH)
+# heart_button = Button(tool_frame, image=heart, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+#                     command=blur)
+# heart_button.pack(padx=25, pady=25, fill=BOTH)
 
 # Buttons für Modi erstellen
 focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                    font=title_font, fg="white", command=activate_focus_mode, state=DISABLED, relief="sunken",
+                    font=title_font, fg="white", command=activate_focus_mode, relief="sunken",
                     height=40, width=40)
 focus_mode.pack(side=BOTTOM, padx=25, pady=25, fill=BOTH)
 
 auto_mode = Button(tool_frame, image=auto, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                   font=title_font, fg="white", state=DISABLED, command=activate_auto_mode, relief="sunken",
+                   font=title_font, fg="white", command=blur, relief="sunken",
                    height=40, width=40)
 auto_mode.pack(side=BOTTOM, padx=25, pady=25, fill=BOTH)
 

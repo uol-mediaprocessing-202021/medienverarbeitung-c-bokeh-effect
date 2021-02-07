@@ -3,7 +3,7 @@ from tkinter.ttk import Progressbar
 import tkinter.font as font
 from functions import func_gui
 from functions import global_vars
-from detection import slic
+from detection import slic, blur
 from PIL import Image, ImageTk
 from tkinter import filedialog
 from queue import Queue
@@ -15,7 +15,7 @@ import numpy
 
 # Bilder öffnen
 def open_image():
-    global img, ori_img, x
+    global img, ori_img, x, blur_img, sec_edit
     global panel, file_menu, info_label
     global auto_mode, focus_mode
 
@@ -27,6 +27,9 @@ def open_image():
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
     panel.place(anchor="center", relx=0.5, rely=0.5)
+
+    blur_img = blur.bokeh(cv2.imread(x))
+    sec_edit = cv2.imread(x)
 
     # infoleiste updaten und speichern unter ermöglichen
     info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
@@ -49,7 +52,7 @@ def save_image():
 
 
 # bearbeitet Bild mit Torch
-def blur():
+def blur_image():
     global x, img, edge_var, scale_var, info_frame, version_label
 
     auto_mode.config(background="#23272a")
@@ -105,10 +108,11 @@ def reset_setup():
 
 # trackt Maus position
 def get_mouse_posn(event):
-    global panel, img, x
+    global panel, img, x, sec_edit
 
-    cv_img = cv2.imread(x)
-    sec_edit = slic.edit_segment(cv_img, 100, event.y, event.x, True)
+    original_img = cv2.imread(x)
+
+    sec_edit = slic.edit_segment(original_img, sec_edit, 100, event.y, event.x, True)
 
     img = ImageTk.PhotoImage(Image.fromarray(sec_edit.astype(numpy.uint8)))
 
@@ -123,13 +127,13 @@ def get_mouse_posn(event):
 
 # wechsel zu fokus Modus
 def activate_focus_mode():
-    global panel, img, x
+    global panel, img, x, blur_img, sec_edit
 
     auto_mode.config(background="#2c2f33")
     focus_mode.config(background="#23272a")
 
     cv_img = cv2.imread(x)
-    seg = slic.show_segmentation(cv_img, 100)
+    seg = slic.show_segmentation(cv_img, sec_edit, 100)
 
     img = ImageTk.PhotoImage(Image.fromarray(seg.astype(numpy.uint8)))
 
@@ -168,6 +172,8 @@ auto = ImageTk.PhotoImage(Image.open("images/mode_icons/auto.png").resize((35, 3
 x = 'images/placeholder.png'
 img = ImageTk.PhotoImage(Image.open(x))
 ori_img = img
+blur_img = cv2.imread(x)
+sec_edit = cv2.imread(x)
 
 # Label für Bilddarstellung
 panel = Canvas(main_frame)
@@ -206,7 +212,7 @@ focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, 
 focus_mode.pack(side=BOTTOM, padx=25, pady=25, fill=BOTH)
 
 auto_mode = Button(tool_frame, image=auto, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                   font=title_font, fg="white", command=blur, relief="sunken",
+                   font=title_font, fg="white", command=blur_image, relief="sunken",
                    height=40, width=40)
 auto_mode.pack(side=BOTTOM, padx=25, pady=25, fill=BOTH)
 

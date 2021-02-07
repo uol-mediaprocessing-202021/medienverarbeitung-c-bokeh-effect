@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter.ttk import Progressbar
+from tkinter.ttk import Progressbar, Separator, Style
 import tkinter.font as font
 from functions import func_gui
 from functions import global_vars
@@ -120,14 +120,14 @@ def get_mouse_posn(event):
 # updated Fokusbereich
 def update_sel_rect(event):
     global rect_id, panel, sec_edit
-    global topy, topx, botx, boty
+    global topy, topx, botx, boty, slider_var, check_var
 
     botx, boty = event.x, event.y
     panel.coords(rect_id, topx, topy, botx, boty)
 
     original_img = cv2.imread(x)
 
-    sec_edit = slic.edit_segment(original_img, sec_edit, 100, topy, topx, botx, boty, True)
+    sec_edit = slic.edit_segment(original_img, sec_edit, slider_var.get(), topy, topx, botx, boty, check_var.get())
 
     img = ImageTk.PhotoImage(Image.fromarray(sec_edit.astype(numpy.uint8)))
 
@@ -142,13 +142,13 @@ def update_sel_rect(event):
 
 # wechsel zu fokus Modus
 def activate_focus_mode():
-    global panel, img, x, blur_img, sec_edit, rect_id
+    global panel, img, x, blur_img, sec_edit, rect_id, slider_var
 
     auto_mode.config(background="#2c2f33")
     focus_mode.config(background="#23272a")
 
     cv_img = cv2.imread(x)
-    seg = slic.show_segmentation(cv_img, sec_edit, 100)
+    seg = slic.show_segmentation(cv_img, sec_edit, slider_var.get())
 
     img = ImageTk.PhotoImage(Image.fromarray(seg.astype(numpy.uint8)))
 
@@ -197,15 +197,44 @@ sec_edit = cv2.imread(x)
 panel = Canvas(main_frame)
 panel.img = img
 
-# Buttons für Effekte erstellen
+# Buttons für Modi erstellen
 title_font = font.Font(family='Arial', size=16, weight='bold')
 
-options_label = Label(tool_frame, text="Effekte", background="#2c2f33", fg="white", font=title_font)
-options_label.pack(pady=10)
+options_label = Label(tool_frame, text="Modi", background="#2c2f33", fg="white", font=title_font)
+options_label.pack(pady=35)
 
 revert_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                        command=reset_image)
 revert_button.pack(padx=25, pady=25, fill=BOTH)
+
+sep1 = Separator(tool_frame, orient=HORIZONTAL)
+sep1.pack(padx=5, pady=5, fill=BOTH)
+
+auto_mode = Button(tool_frame, image=auto, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                   font=title_font, fg="white", command=blur_image, relief="sunken", height=40, width=40)
+auto_mode.pack(padx=25, pady=25, fill=BOTH)
+
+sep2 = Separator(tool_frame, orient=HORIZONTAL)
+sep2.pack(padx=5, pady=5, fill=BOTH)
+
+focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                    font=title_font, fg="white", command=activate_focus_mode, relief="sunken", height=40, width=40)
+focus_mode.pack(padx=25, pady=25, fill=BOTH)
+
+slider_var = DoubleVar()
+slider = Scale(tool_frame, from_=10, to=200, bg="#2c2f33", bd=0, fg="white", troughcolor="#3a3e43",
+               length=70, sliderlength=20, variable=slider_var)
+slider.set(100)
+slider.pack(padx=25, pady=25, fill=BOTH)
+
+check_var = BooleanVar()
+check_var.set(True)
+check = Checkbutton(tool_frame, text="Blur", variable=check_var, bg="#2c2f33", activebackground="#2c2f33")
+check.pack(padx=25, pady=25, fill=BOTH)
+check.select()
+
+sep3 = Separator(tool_frame, orient=HORIZONTAL)
+sep3.pack(padx=5, pady=5, fill=BOTH)
 
 # circle_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
 #                      command=blur)
@@ -222,20 +251,6 @@ revert_button.pack(padx=25, pady=25, fill=BOTH)
 # heart_button = Button(tool_frame, image=heart, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
 #                     command=blur)
 # heart_button.pack(padx=25, pady=25, fill=BOTH)
-
-# Buttons für Modi erstellen
-focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                    font=title_font, fg="white", command=activate_focus_mode, relief="sunken",
-                    height=40, width=40)
-focus_mode.pack(side=BOTTOM, padx=25, pady=25, fill=BOTH)
-
-auto_mode = Button(tool_frame, image=auto, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                   font=title_font, fg="white", command=blur_image, relief="sunken",
-                   height=40, width=40)
-auto_mode.pack(side=BOTTOM, padx=25, pady=25, fill=BOTH)
-
-options_label = Label(tool_frame, text="Modi", background="#2c2f33", fg="white", font=title_font)
-options_label.pack(pady=10, side=BOTTOM)
 
 # label für Bildinfo erstellen
 info_label = Label(info_frame, background="#23272a", fg="white")
@@ -264,8 +279,8 @@ menu.add_cascade(label="Datei", menu=file_menu)
 
 # Unterreiter für 'Einstellungen'
 edge_var = IntVar()
-edge_menu.add_radiobutton(label="PyTorch mit PoolNET", value=0, variable=edge_var)
-edge_menu.add_radiobutton(label="nur PyTorch", value=1, variable=edge_var)
+edge_menu.add_radiobutton(label="PoolNET", value=0, variable=edge_var)
+edge_menu.add_radiobutton(label="R-CNN", value=1, variable=edge_var)
 edge_var.set(0)
 setup_menu.add_cascade(label="Kantenerkennung", menu=edge_menu)
 

@@ -28,9 +28,8 @@ def open_image():
     img = Image.open(x)
     ori_img = ImageTk.PhotoImage(img)
 
-    if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
-        img = img.resize((int(win_w * 0.7), int(win_h * 0.7)), Image.ANTIALIAS)
-        ori_resize = img.resize((int(win_w * 0.7), int(win_h * 0.7)), Image.ANTIALIAS)
+    img = resize_image(img)
+    ori_resize = img
 
     img = ImageTk.PhotoImage(img)
 
@@ -84,8 +83,7 @@ def blur_image():
 
     if not que.empty():
         result = Image.fromarray(que.get())
-        if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
-            result = result.resize((int(win_w * 0.7), int(win_h * 0.7)), Image.ANTIALIAS)
+        result = resize_image(result)
 
         img = ImageTk.PhotoImage(result)
 
@@ -149,8 +147,8 @@ def update_sel_rect(event):
     sec_edit = slic.edit_segment(original_img, sec_edit, slider_var.get(), topy, topx, botx, boty, check_var.get())
 
     result = Image.fromarray(sec_edit.astype(numpy.uint8))
-    if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
-        result = result.resize((int(win_w * 0.7), int(win_h * 0.7)), Image.ANTIALIAS)
+
+    result = resize_image(result)
 
     img = ImageTk.PhotoImage(result)
 
@@ -175,8 +173,8 @@ def activate_focus_mode():
     seg = slic.show_segmentation(cv_img, sec_edit, slider_var.get())
 
     result = Image.fromarray(seg.astype(numpy.uint8))
-    if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
-        result = result.resize((int(win_w * 0.7), int(win_h * 0.7)), Image.ANTIALIAS)
+
+    result = resize_image(result)
 
     img = ImageTk.PhotoImage(result)
 
@@ -187,6 +185,23 @@ def activate_focus_mode():
 
     panel.bind('<Button-1>', get_mouse_posn)
     panel.bind('<B1-Motion>', update_sel_rect)
+
+
+def resize_image(image):
+    global ori_img, win_w, win_h
+    scale_fac = 0.7
+    max_w = int(win_w * scale_fac)
+    max_h = int(win_h * scale_fac)
+
+    if (ori_img.width() >= max_w) or (ori_img.height() >= max_h):
+        aspect = ori_img.height() / ori_img.width()
+
+        new_w = int(max_h / aspect)
+
+        result = image.resize((new_w, max_h), Image.ANTIALIAS)
+        return result
+    else:
+        return image
 
 
 # Äußeres Fenster erstellen

@@ -37,7 +37,7 @@ def edit_segment(ori_image, image, num_segments, x_start, x_end, y_start, y_end,
     edited = mask.apply_mask(original, image_mask)
 
     result = image + edited
-    result = cv2.cvtColor(np.asarray(result, dtype='uint8'), cv2.COLOR_RGB2BGR)
+    result = np.asarray(result, dtype='uint8')
 
     return result
 
@@ -53,9 +53,11 @@ def get_mask_segments(image, segments, x_start, x_end, y_start, y_end):
         image_mask[segments == segVal] = 255
     return image_mask / 255
 
+
 # test = cv2.imread('blue-4430534_640.jpg')
 # test_blurred = blur.bokeh(test)
 # cv2.imshow('Test', show_segmentation(test, test_blurred, 300))
 # cv2.waitKey(0)
-# cv2.imshow('Edited', cv2.cvtColor(edit_segment(test, test, 100, 0, 30, 100, 200, True), cv2.COLOR_BGR2RGB))
+# cv2.imshow('Edited', edit_segment(test, test, 100, 0, 30, 100, 200, True))
+#
 # cv2.waitKey(0)

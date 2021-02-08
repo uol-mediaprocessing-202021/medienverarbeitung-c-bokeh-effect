@@ -137,31 +137,31 @@ def reset_setup():
 
 # trackt Maus position
 def get_mouse_posn(event):
-    global topy, topx, botx, boty
+    global x_start, y_start, x_end, y_end
 
-    topx, topy = event.x, event.y
-    botx, boty = event.x, event.y
+    x_start, y_start = event.x, event.y
+    x_end, y_end = event.x, event.y
 
 
 # updated Fokusbereich
 def update_sel_rect(event):
     global rect_id, panel, sec_edit, img, ori_img
-    global topy, topx, botx, boty, slider_var, check_var
+    global x_start, y_start, x_end, y_end, slider_var, check_var
 
-    botx, boty = event.x, event.y
-    panel.coords(rect_id, topx, topy, botx, boty)
+    x_end, y_end = event.x, event.y
+    panel.coords(rect_id, x_start, y_start, x_end, y_end)
 
 
 def blur_area(event):
     global rect_id, panel, sec_edit, img, ori_img
-    global topy, topx, botx, boty, slider_var, check_var
+    global x_start, y_start, x_end, y_end, slider_var, check_var
 
-    print(topx, botx, topy, boty)
+    print(x_start, y_start, x_end, y_end)
 
     original_img = cv2.imread(x)
 
     # editiere die ausgewählten segmente
-    sec_edit = slic2.edit_segment(original_img, sec_edit, slider_var.get(), topx, botx, topy, boty, check_var.get())
+    sec_edit = slic2.edit_segment(original_img, sec_edit, slider_var.get(), x_start, x_end, y_start, y_end, check_var.get())
 
     # konvertiere Ergebnis in PhotImage und zeige an
     result = Image.fromarray(sec_edit.astype(numpy.uint8))
@@ -201,7 +201,7 @@ def focus_blur():
     panel.create_image(0, 0, image=img, anchor=NW)
 
     # zeichne Rechteck um Maus
-    rect_id = panel.create_rectangle(topx, topy, topx, topy, dash=(20, 20), fill='', outline='white')
+    rect_id = panel.create_rectangle(y_start, x_start, y_start, x_start, dash=(20, 20), fill='', outline='white')
 
     panel.bind('<Button-1>', get_mouse_posn)
     panel.bind('<B1-Motion>', update_sel_rect)
@@ -265,7 +265,7 @@ blur_img = cv2.imread(x)
 sec_edit = cv2.imread(x)
 
 # für markierung des Rechtecks im Fokusmodus
-topx, topy, botx, boty = 0, 0, 0, 0
+y_start, x_start, x_end, y_end = 0, 0, 0, 0
 rect_id = None
 
 # Label für Bilddarstellung

@@ -1,38 +1,34 @@
 from tkinter import *
-from tkinter.ttk import Progressbar, Separator, Style
+from tkinter import filedialog
+from tkinter.ttk import Progressbar, Separator
 import tkinter.font as font
-from functions import func_gui
-from functions import global_vars
+from functions import func_gui, global_vars
 from detection import slic, blur
 from PIL import Image, ImageTk
-from tkinter import filedialog
 from queue import Queue
 import cv2
 import os
 import time
 import numpy
 
-topx, topy, botx, boty = 0, 0, 0, 0
-rect_id = None
-
 
 # Bilder öffnen
 def open_image():
     global img, ori_img, x, blur_img, sec_edit
     global panel, file_menu, info_label
-    global auto_mode, focus_mode
-    global win_h, win_w, ori_resize
+    global ori_resize
 
     # Bild laden und in canvas (panel) speichern
     x = filedialog.askopenfilename(title='Bild öffnen')
     img = Image.open(x)
     ori_img = ImageTk.PhotoImage(img)
 
+    # Bild bei bedarf resizen und in PhotoImage convertieren
     img = resize_image(img)
     ori_resize = img
-
     img = ImageTk.PhotoImage(img)
 
+    # Bild in der Anwendung anzeigen
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
     panel.place(anchor="center", relx=0.5, rely=0.5)
@@ -48,27 +44,31 @@ def open_image():
 
 # Bilder speichern
 def save_image():
-    global img, panel, x
+    global img, x
 
+    # Benutzer sucht pfad und name zum speichern aus
     y = filedialog.asksaveasfilename(title='Bild speichern unter', filetypes=(
         ("PNG Datei (*.png)", "*.png"),
         ("JPEG Datei (*.jpeg)", "*.jpeg"),
         ("Alle Dateien", "*.*"),
     ), defaultextension=os.path.splitext(x), initialfile=os.path.basename(x))
 
+    # Konvertiere in speicherbares Dateiformat und speichere
     new_image = func_gui.covert_imgtk2img(img)
     new_image.save(y)
 
 
-# bearbeitet Bild mit Torch
+# bearbeitet Bild mit Torch oder PoolNet
 def blur_image():
     global x, img, edge_var, scale_var, info_frame, version_label
-    global ori_img, win_w, win_h
+    global auto_mode, focus_mode
 
     auto_mode.config(background="#23272a")
     focus_mode.config(background="#2c2f33")
 
     que = Queue()
+
+    # erstellt einen Thread auf dem die Bildbearbeitung statt findet
     try:
         image_thread = func_gui.IPThread(edge_var.get(), x, scale_var.get(), que)
         image_thread.start()
@@ -76,17 +76,19 @@ def blur_image():
         print("[Error] unable to start ImageProcessing_Thread")
         time.sleep(1)
 
+    # zeige Ladebalken an, damit Benuter weiß, dass der Algorithmus ausgeführt wird
     version_label.config(text=" ")
     progress = Progressbar(info_frame, orient=HORIZONTAL, length=75, mode='indeterminate')
     progress.pack(side=LEFT)
     func_gui.bar(progress, info_frame)
 
+    # hohle das fertige Bild aus der que und konvertiere es in PhotoImage
     if not que.empty():
         result = Image.fromarray(que.get())
         result = resize_image(result)
-
         img = ImageTk.PhotoImage(result)
 
+    # zeige fertiges Bild an
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
@@ -127,7 +129,6 @@ def reset_setup():
 
 # trackt Maus position
 def get_mouse_posn(event):
-    global panel, img, x, sec_edit
     global topy, topx
 
     topx, topy = event.x, event.y
@@ -137,19 +138,18 @@ def get_mouse_posn(event):
 def update_sel_rect(event):
     global rect_id, panel, sec_edit, img, ori_img
     global topy, topx, botx, boty, slider_var, check_var
-    global win_h, win_w
 
     botx, boty = event.x, event.y
     panel.coords(rect_id, topx, topy, botx, boty)
 
     original_img = cv2.imread(x)
 
+    # editiere die ausgewählten segmente
     sec_edit = slic.edit_segment(original_img, sec_edit, slider_var.get(), topy, topx, botx, boty, check_var.get())
 
+    # konvertiere Ergebnis in PhotImage und zeige an
     result = Image.fromarray(sec_edit.astype(numpy.uint8))
-
     result = resize_image(result)
-
     img = ImageTk.PhotoImage(result)
 
     panel.config(width=img.width(), height=img.height())
@@ -162,42 +162,48 @@ def update_sel_rect(event):
 
 
 # wechsel zu fokus Modus
-def activate_focus_mode():
-    global panel, img, x, blur_img, sec_edit, rect_id, slider_var, ori_img
-    global win_h, win_w
+def focus_blur():
+    global panel, img, x, sec_edit, rect_id, slider_var
 
     auto_mode.config(background="#2c2f33")
     focus_mode.config(background="#23272a")
 
+    # erstelle segmentiertes Bild für Benuzer
     cv_img = cv2.imread(x)
     seg = slic.show_segmentation(cv_img, sec_edit, slider_var.get())
 
+    # konvertiere und zeige an
     result = Image.fromarray(seg.astype(numpy.uint8))
-
     result = resize_image(result)
-
     img = ImageTk.PhotoImage(result)
 
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
+    # zeichne Rechteck um Maus
     rect_id = panel.create_rectangle(topx, topy, topx, topy, dash=(20, 20), fill='', outline='white')
 
     panel.bind('<Button-1>', get_mouse_posn)
     panel.bind('<B1-Motion>', update_sel_rect)
 
 
+# Skaliert Bilder wenn diese Größer als das Fenster sind
 def resize_image(image):
     global ori_img, win_w, win_h
+
+    # Berechne die Maximal Höhe und Breite des Bildes in relation zur Bildschirmgröße
     scale_fac = 0.7
     max_w = int(win_w * scale_fac)
     max_h = int(win_h * scale_fac)
 
+    # Skaliere wenn Bild zu groß für Anwendungsfenster
     if (ori_img.width() >= max_w) or (ori_img.height() >= max_h):
-        aspect = ori_img.height() / ori_img.width()
 
+        # Berechne Aspect Radio und die neue Breite des Bildes
+        aspect = ori_img.height() / ori_img.width()
         new_w = int(max_h / aspect)
 
+        # Skaliere Bild auf neue maße
         result = image.resize((new_w, max_h), Image.ANTIALIAS)
         return result
     else:
@@ -226,10 +232,6 @@ main_frame.pack(side=LEFT, fill=BOTH, expand=True)
 
 # Icons für Buttons laden
 noe = ImageTk.PhotoImage(Image.open("images/tool_icons/revert.png").resize((35, 35), Image.ANTIALIAS))
-# ring = ImageTk.PhotoImage(Image.open("images/tool_icons/circles.png").resize((35, 35), Image.ANTIALIAS))
-# star = ImageTk.PhotoImage(Image.open("images/tool_icons/stars.png").resize((35, 35), Image.ANTIALIAS))
-# hexa = ImageTk.PhotoImage(Image.open("images/tool_icons/hexa.png").resize((35, 30), Image.ANTIALIAS))
-# heart = ImageTk.PhotoImage(Image.open("images/tool_icons/hearts.png").resize((35, 35), Image.ANTIALIAS))
 foc = ImageTk.PhotoImage(Image.open("images/mode_icons/focus.png").resize((35, 35), Image.ANTIALIAS))
 auto = ImageTk.PhotoImage(Image.open("images/mode_icons/auto.png").resize((35, 35), Image.ANTIALIAS))
 
@@ -241,11 +243,15 @@ ori_resize = img
 blur_img = cv2.imread(x)
 sec_edit = cv2.imread(x)
 
+# für markierung des Rechtecks im Fokusmodus
+topx, topy, botx, boty = 0, 0, 0, 0
+rect_id = None
+
 # Label für Bilddarstellung
 panel = Canvas(main_frame)
 panel.img = img
 
-# Buttons für Modi erstellen
+# Buttons, Slider und ander Bedinelemente für Modi erstellen
 title_font = font.Font(family='Arial', size=16, weight='bold')
 
 options_label = Label(tool_frame, text="Modi", background="#2c2f33", fg="white", font=title_font)
@@ -266,7 +272,7 @@ sep2 = Separator(tool_frame, orient=HORIZONTAL)
 sep2.pack(padx=5, pady=5, fill=BOTH)
 
 focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                    font=title_font, fg="white", command=activate_focus_mode, relief="sunken", height=40, width=40)
+                    font=title_font, fg="white", command=focus_blur, relief="sunken", height=40, width=40)
 focus_mode.pack(padx=30, pady=30, fill=BOTH)
 
 slider_var = DoubleVar()
@@ -283,22 +289,6 @@ check.select()
 
 sep3 = Separator(tool_frame, orient=HORIZONTAL)
 sep3.pack(padx=5, pady=5, fill=BOTH)
-
-# circle_button = Button(tool_frame, image=ring, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-#                      command=blur)
-# circle_button.pack(padx=25, pady=25, fill=BOTH)
-
-# star_button = Button(tool_frame, image=star, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-#                    command=blur)
-# star_button.pack(padx=25, pady=25, fill=BOTH)
-
-# hex_button = Button(tool_frame, image=hexa, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-#                   command=blur)
-# hex_button.pack(padx=25, pady=25, fill=BOTH)
-
-# heart_button = Button(tool_frame, image=heart, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-#                     command=blur)
-# heart_button.pack(padx=25, pady=25, fill=BOTH)
 
 # label für Bildinfo erstellen
 info_label = Label(info_frame, background="#23272a", fg="white")

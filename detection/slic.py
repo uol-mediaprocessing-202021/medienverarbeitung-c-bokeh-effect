@@ -52,8 +52,3 @@ def get_mask_segment(image, segments, x, y):
                         image[py][px][1] = 0
                         image[py][px][2] = 0
             return image, image_mask
-
-# test = cv2.imread('C:/Users/malte/Desktop/luchs.jpg')
-# print(type(test))
-# show_segmentation(test, 100)
-# edit_segment(test, 100, 80, 160, True)

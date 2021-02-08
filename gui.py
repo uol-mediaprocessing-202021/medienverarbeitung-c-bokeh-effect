@@ -21,12 +21,19 @@ def open_image():
     global img, ori_img, x, blur_img, sec_edit
     global panel, file_menu, info_label
     global auto_mode, focus_mode
+    global win_h, win_w, ori_resize
 
     # Bild laden und in canvas (panel) speichern
     x = filedialog.askopenfilename(title='Bild öffnen')
     img = Image.open(x)
+    ori_img = ImageTk.PhotoImage(img)
+
+    if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
+        img = img.resize((int(win_w * 0.7), int(win_h * 0.7)), Image.ANTIALIAS)
+        ori_resize = img.resize((int(win_w * 0.7), int(win_h * 0.7)), Image.ANTIALIAS)
+
     img = ImageTk.PhotoImage(img)
-    ori_img = img
+
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
     panel.place(anchor="center", relx=0.5, rely=0.5)
@@ -57,6 +64,7 @@ def save_image():
 # bearbeitet Bild mit Torch
 def blur_image():
     global x, img, edge_var, scale_var, info_frame, version_label
+    global ori_img, win_w, win_h
 
     auto_mode.config(background="#23272a")
     focus_mode.config(background="#2c2f33")
@@ -75,7 +83,11 @@ def blur_image():
     func_gui.bar(progress, info_frame)
 
     if not que.empty():
-        img = ImageTk.PhotoImage(Image.fromarray(que.get()))
+        result = Image.fromarray(que.get())
+        if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
+            result = result.resize((int(win_w * 0.7), int(win_h * 0.7)), Image.ANTIALIAS)
+
+        img = ImageTk.PhotoImage(result)
 
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
@@ -91,8 +103,14 @@ def blur_image():
 
 # setzt das Bild zum Ursprung zurück
 def reset_image():
-    global panel, img, ori_img
+    global panel, img, ori_img, ori_resize
     img = ori_img
+
+    if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
+        img = ori_resize
+
+    img = ImageTk.PhotoImage(img)
+
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
@@ -119,8 +137,9 @@ def get_mouse_posn(event):
 
 # updated Fokusbereich
 def update_sel_rect(event):
-    global rect_id, panel, sec_edit
+    global rect_id, panel, sec_edit, img, ori_img
     global topy, topx, botx, boty, slider_var, check_var
+    global win_h, win_w
 
     botx, boty = event.x, event.y
     panel.coords(rect_id, topx, topy, botx, boty)
@@ -129,7 +148,11 @@ def update_sel_rect(event):
 
     sec_edit = slic.edit_segment(original_img, sec_edit, slider_var.get(), topy, topx, botx, boty, check_var.get())
 
-    img = ImageTk.PhotoImage(Image.fromarray(sec_edit.astype(numpy.uint8)))
+    result = Image.fromarray(sec_edit.astype(numpy.uint8))
+    if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
+        result = result.resize((int(win_w * 0.7), int(win_h * 0.7)), Image.ANTIALIAS)
+
+    img = ImageTk.PhotoImage(result)
 
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
@@ -142,7 +165,8 @@ def update_sel_rect(event):
 
 # wechsel zu fokus Modus
 def activate_focus_mode():
-    global panel, img, x, blur_img, sec_edit, rect_id, slider_var
+    global panel, img, x, blur_img, sec_edit, rect_id, slider_var, ori_img
+    global win_h, win_w
 
     auto_mode.config(background="#2c2f33")
     focus_mode.config(background="#23272a")
@@ -150,7 +174,11 @@ def activate_focus_mode():
     cv_img = cv2.imread(x)
     seg = slic.show_segmentation(cv_img, sec_edit, slider_var.get())
 
-    img = ImageTk.PhotoImage(Image.fromarray(seg.astype(numpy.uint8)))
+    result = Image.fromarray(seg.astype(numpy.uint8))
+    if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
+        result = result.resize((int(win_w * 0.7), int(win_h * 0.7)), Image.ANTIALIAS)
+
+    img = ImageTk.PhotoImage(result)
 
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
@@ -167,14 +195,18 @@ root.iconbitmap('images/camera.ico')
 root.title("Bokeh Effekt")
 root.config(background="#99aab5")
 
+win_w = root.winfo_screenwidth()
+win_h = root.winfo_screenheight()
+root.geometry('%sx%s' % (int(win_w/1.5), int(win_h/1.5)))
+
 # Innere Fenster erstellen
-info_frame = Frame(root, width=750, height=30, background="#23272a")
+info_frame = Frame(root, background="#23272a")
 info_frame.pack(side=BOTTOM, fill=BOTH)
 
-tool_frame = Frame(root, width=250, background="#2c2f33")
+tool_frame = Frame(root, background="#2c2f33")
 tool_frame.pack(side=LEFT, fill=BOTH)
 
-main_frame = Frame(root, width=500, height=500, background="#3a3e43")
+main_frame = Frame(root, background="#3a3e43")
 main_frame.pack(side=LEFT, fill=BOTH, expand=True)
 
 # Icons für Buttons laden
@@ -190,6 +222,7 @@ auto = ImageTk.PhotoImage(Image.open("images/mode_icons/auto.png").resize((35, 3
 x = 'images/placeholder.png'
 img = ImageTk.PhotoImage(Image.open(x))
 ori_img = img
+ori_resize = img
 blur_img = cv2.imread(x)
 sec_edit = cv2.imread(x)
 
@@ -205,27 +238,27 @@ options_label.pack(pady=35)
 
 revert_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                        command=reset_image)
-revert_button.pack(padx=25, pady=25, fill=BOTH)
+revert_button.pack(padx=30, pady=30, fill=BOTH)
 
 sep1 = Separator(tool_frame, orient=HORIZONTAL)
 sep1.pack(padx=5, pady=5, fill=BOTH)
 
 auto_mode = Button(tool_frame, image=auto, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                    font=title_font, fg="white", command=blur_image, relief="sunken", height=40, width=40)
-auto_mode.pack(padx=25, pady=25, fill=BOTH)
+auto_mode.pack(padx=30, pady=30, fill=BOTH)
 
 sep2 = Separator(tool_frame, orient=HORIZONTAL)
 sep2.pack(padx=5, pady=5, fill=BOTH)
 
 focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                     font=title_font, fg="white", command=activate_focus_mode, relief="sunken", height=40, width=40)
-focus_mode.pack(padx=25, pady=25, fill=BOTH)
+focus_mode.pack(padx=30, pady=30, fill=BOTH)
 
 slider_var = DoubleVar()
 slider = Scale(tool_frame, from_=10, to=200, bg="#2c2f33", bd=0, fg="white", troughcolor="#3a3e43",
                length=70, sliderlength=20, variable=slider_var)
 slider.set(100)
-slider.pack(padx=25, pady=25, fill=BOTH)
+slider.pack(padx=30, pady=30, fill=BOTH)
 
 check_var = BooleanVar()
 check_var.set(True)

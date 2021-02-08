@@ -37,7 +37,7 @@ def edit_segment(ori_image, image, num_segments, x_start, x_end, y_start, y_end,
     edited = mask.apply_mask(original, image_mask)
 
     result = image + edited
-    result = np.asarray(result, dtype='uint8')
+    result = cv2.cvtColor(np.asarray(result, dtype='uint8'), cv2.COLOR_RGB2BGR)
 
     return result
 
@@ -49,7 +49,7 @@ def get_mask_segments(image, segments, x_start, x_end, y_start, y_end):
             selected_segments.append(segments[row][column])
     image_mask = np.zeros(image.shape[:2], dtype="uint8")
     for (i, segVal) in enumerate(np.unique(selected_segments)):
-        print("[x] inspecting segment %d" % i)
+        #print("[x] inspecting segment %d" % i)
         image_mask[segments == segVal] = 255
     return image_mask / 255
 

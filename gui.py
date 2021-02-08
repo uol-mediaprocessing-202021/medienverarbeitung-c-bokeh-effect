@@ -3,7 +3,7 @@ from tkinter import filedialog
 from tkinter.ttk import Progressbar, Separator
 import tkinter.font as font
 from functions import func_gui, global_vars
-from detection import slic, blur
+from detection import slic, slic2, blur
 from PIL import Image, ImageTk
 from queue import Queue
 import cv2
@@ -104,17 +104,25 @@ def blur_image():
 # setzt das Bild zum Ursprung zurück
 def reset_image():
     global panel, img, ori_img, ori_resize
+    global blur_img, sec_edit
+
     img = ori_img
 
     if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
         img = ori_resize
+        img = ImageTk.PhotoImage(img)
 
-    img = ImageTk.PhotoImage(img)
+    blur_img = blur.bokeh(cv2.imread(x))
+    sec_edit = cv2.imread(x)
 
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
+    panel.delete(rect_id)
+
     panel.unbind('<Button-1>')
+    panel.unbind('<B1-Motion>')
+    panel.unbind('<ButtonRelease-1>')
 
     auto_mode.config(background="#2c2f33")
     focus_mode.config(background="#2c2f33")
@@ -129,9 +137,10 @@ def reset_setup():
 
 # trackt Maus position
 def get_mouse_posn(event):
-    global topy, topx
+    global topy, topx, botx, boty
 
     topx, topy = event.x, event.y
+    botx, boty = event.x, event.y
 
 
 # updated Fokusbereich
@@ -142,10 +151,17 @@ def update_sel_rect(event):
     botx, boty = event.x, event.y
     panel.coords(rect_id, topx, topy, botx, boty)
 
+
+def blur_area(event):
+    global rect_id, panel, sec_edit, img, ori_img
+    global topy, topx, botx, boty, slider_var, check_var
+
+    print(topx, botx, topy, boty)
+
     original_img = cv2.imread(x)
 
     # editiere die ausgewählten segmente
-    sec_edit = slic.edit_segment(original_img, sec_edit, slider_var.get(), topy, topx, botx, boty, check_var.get())
+    sec_edit = slic2.edit_segment(original_img, sec_edit, slider_var.get(), topx, botx, topy, boty, check_var.get())
 
     # konvertiere Ergebnis in PhotImage und zeige an
     result = Image.fromarray(sec_edit.astype(numpy.uint8))
@@ -158,7 +174,11 @@ def update_sel_rect(event):
     auto_mode.config(background="#2c2f33")
     focus_mode.config(background="#2c2f33")
 
+    panel.delete(rect_id)
+
     panel.unbind('<Button-1>')
+    panel.unbind('<B1-Motion>')
+    panel.unbind('<ButtonRelease-1>')
 
 
 # wechsel zu fokus Modus
@@ -170,7 +190,7 @@ def focus_blur():
 
     # erstelle segmentiertes Bild für Benuzer
     cv_img = cv2.imread(x)
-    seg = slic.show_segmentation(cv_img, sec_edit, slider_var.get())
+    seg = slic2.show_segmentation(cv_img, sec_edit, slider_var.get())
 
     # konvertiere und zeige an
     result = Image.fromarray(seg.astype(numpy.uint8))
@@ -185,6 +205,7 @@ def focus_blur():
 
     panel.bind('<Button-1>', get_mouse_posn)
     panel.bind('<B1-Motion>', update_sel_rect)
+    panel.bind('<ButtonRelease-1>', blur_area)
 
 
 # Skaliert Bilder wenn diese Größer als das Fenster sind

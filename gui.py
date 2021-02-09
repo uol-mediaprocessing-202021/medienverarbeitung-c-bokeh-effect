@@ -62,7 +62,7 @@ def save_image():
 
 # bearbeitet Bild mit Torch oder PoolNet
 def blur_image():
-    global x, img, edge_var, scale_var, info_frame, version_label
+    global x, img, edge_var, scale_var, info_frame, version_label, sec_edit
     global auto_mode, focus_mode
 
     auto_mode.config(background="#23272a")
@@ -86,7 +86,8 @@ def blur_image():
 
     # hohle das fertige Bild aus der que und konvertiere es in PhotoImage
     if not que.empty():
-        result = Image.fromarray(cv2.cvtColor(que.get(), cv2.COLOR_BGR2RGB))
+        sec_edit = que.get()
+        result = Image.fromarray(cv2.cvtColor(sec_edit, cv2.COLOR_BGR2RGB))
         result = resize_image(result)
         img = ImageTk.PhotoImage(result)
 

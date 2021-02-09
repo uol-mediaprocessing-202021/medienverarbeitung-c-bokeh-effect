@@ -156,8 +156,6 @@ def blur_area(event):
     global rect_id, panel, sec_edit, img, ori_img
     global x_start, y_start, x_end, y_end, slider_var, check_var
 
-    print(x_start, y_start, x_end, y_end)
-
     original_img = cv2.imread(x)
 
     # editiere die ausgewählten segmente
@@ -273,39 +271,54 @@ panel = Canvas(main_frame)
 panel.img = img
 
 # Buttons, Slider und ander Bedinelemente für Modi erstellen
-title_font = font.Font(family='Arial', size=16, weight='bold')
+label_font = font.Font(family='Arial', size=10, weight='bold')
+title_font = font.Font(family='Arial', size=20, weight='bold')
 
-options_label = Label(tool_frame, text="Modi", background="#2c2f33", fg="white", font=title_font)
-options_label.pack(pady=35)
+title_label = Label(tool_frame, text="Modi", background="#2c2f33", fg="white", font=title_font)
+title_label.pack(pady=30)
+
+revert_label = Label(tool_frame, text="Zurücksetzen", background="#2c2f33", fg="white", font=label_font)
+revert_label.pack()
+
+sep = Separator(tool_frame, orient=HORIZONTAL)
+sep.pack(padx=5, fill=BOTH)
 
 revert_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                        command=reset_image)
 revert_button.pack(padx=30, pady=30, fill=BOTH)
 
+auto_label = Label(tool_frame, text="Auto-Modus", background="#2c2f33", fg="white", font=label_font)
+auto_label.pack()
+
 sep1 = Separator(tool_frame, orient=HORIZONTAL)
-sep1.pack(padx=5, pady=5, fill=BOTH)
+sep1.pack(padx=5, fill=BOTH)
 
 auto_mode = Button(tool_frame, image=auto, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                    font=title_font, fg="white", command=blur_image, relief="sunken", height=40, width=40)
 auto_mode.pack(padx=30, pady=30, fill=BOTH)
 
+focus_label = Label(tool_frame, text="Fokus-Modus", background="#2c2f33", fg="white", font=label_font)
+focus_label.pack()
+
 sep2 = Separator(tool_frame, orient=HORIZONTAL)
-sep2.pack(padx=5, pady=5, fill=BOTH)
+sep2.pack(padx=5, fill=BOTH)
 
 focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
                     font=title_font, fg="white", command=focus_blur, relief="sunken", height=40, width=40)
-focus_mode.pack(padx=30, pady=30, fill=BOTH)
+focus_mode.pack(padx=30, pady=20, fill=BOTH)
 
 slider_var = DoubleVar()
-slider = Scale(tool_frame, from_=10, to=200, bg="#2c2f33", bd=0, fg="white", troughcolor="#3a3e43",
-               length=70, sliderlength=20, variable=slider_var)
+slider = Scale(tool_frame, from_=5, to=205, bg="#2c2f33", bd=3, fg="white", troughcolor="#3a3e43",
+               length=80, sliderlength=20, variable=slider_var, resolution=5, highlightbackground="#2c2f33",
+               activebackground="#2c2f33")
 slider.set(100)
-slider.pack(padx=30, pady=30, fill=BOTH)
+slider.pack(padx=15, pady=20, fill=BOTH)
 
 check_var = BooleanVar()
 check_var.set(True)
-check = Checkbutton(tool_frame, text="Blur", variable=check_var, bg="#2c2f33", activebackground="#2c2f33")
-check.pack(padx=25, pady=25, fill=BOTH)
+check = Checkbutton(tool_frame, text="Blur", variable=check_var, bg="#2c2f33", activebackground="#2c2f33",
+                    font=label_font, fg="white", selectcolor="#2c2f33")
+check.pack(padx=25, pady=20, fill=BOTH)
 check.select()
 
 sep3 = Separator(tool_frame, orient=HORIZONTAL)

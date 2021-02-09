@@ -27,7 +27,7 @@ def bokeh(image):
 
     blur = defocus_blur(image, dimension)
 
-    final = np.array(np.maximum(bok, blur))
+    final = np.asarray(np.maximum(bok, blur) * 255, dtype='uint8')
 
     cv2.waitKey(0)
 

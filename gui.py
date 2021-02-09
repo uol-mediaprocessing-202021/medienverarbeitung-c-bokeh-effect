@@ -1,15 +1,17 @@
+import os
+import time
+import tkinter.font as font
+from queue import Queue
 from tkinter import *
 from tkinter import filedialog
 from tkinter.ttk import Progressbar, Separator
-import tkinter.font as font
-from functions import func_gui, global_vars
-from detection import slic, slic2, blur
-from PIL import Image, ImageTk
-from queue import Queue
+
 import cv2
-import os
-import time
 import numpy
+from PIL import Image, ImageTk
+
+from detection import slic, blur
+from functions import func_gui, global_vars
 
 
 # Bilder öffnen
@@ -84,7 +86,7 @@ def blur_image():
 
     # hohle das fertige Bild aus der que und konvertiere es in PhotoImage
     if not que.empty():
-        result = Image.fromarray(que.get())
+        result = Image.fromarray(cv2.cvtColor(que.get(), cv2.COLOR_BGR2RGB))
         result = resize_image(result)
         img = ImageTk.PhotoImage(result)
 
@@ -161,10 +163,10 @@ def blur_area(event):
     original_img = cv2.imread(x)
 
     # editiere die ausgewählten segmente
-    sec_edit = slic2.edit_segment(original_img, sec_edit, slider_var.get(), x_start, x_end, y_start, y_end, check_var.get())
+    sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), x_start, x_end, y_start, y_end, check_var.get())
 
     # konvertiere Ergebnis in PhotImage und zeige an
-    result = Image.fromarray(sec_edit.astype(numpy.uint8))
+    result = Image.fromarray(cv2.cvtColor(sec_edit, cv2.COLOR_BGR2RGB).astype(numpy.uint8))
     result = resize_image(result)
     img = ImageTk.PhotoImage(result)
 
@@ -190,10 +192,10 @@ def focus_blur():
 
     # erstelle segmentiertes Bild für Benuzer
     cv_img = cv2.imread(x)
-    seg = slic2.show_segmentation(cv_img, sec_edit, slider_var.get())
+    seg = slic.show_segmentation(sec_edit, cv_img, slider_var.get())
 
     # konvertiere und zeige an
-    result = Image.fromarray(seg.astype(numpy.uint8))
+    result = Image.fromarray(cv2.cvtColor(seg, cv2.COLOR_BGR2RGB).astype(numpy.uint8))
     result = resize_image(result)
     img = ImageTk.PhotoImage(result)
 
@@ -256,7 +258,7 @@ noe = ImageTk.PhotoImage(Image.open("images/tool_icons/revert.png").resize((35, 
 foc = ImageTk.PhotoImage(Image.open("images/mode_icons/focus.png").resize((35, 35), Image.ANTIALIAS))
 auto = ImageTk.PhotoImage(Image.open("images/mode_icons/auto.png").resize((35, 35), Image.ANTIALIAS))
 
-# reserviere Speicherplatz für zu bearbeitendes Bild und kopie für reset
+# reserviere Speicherplatz für zu bearbeitendes Bild und Kopie für reset
 x = 'images/placeholder.png'
 img = ImageTk.PhotoImage(Image.open(x))
 ori_img = img
@@ -264,7 +266,7 @@ ori_resize = img
 blur_img = cv2.imread(x)
 sec_edit = cv2.imread(x)
 
-# für markierung des Rechtecks im Fokusmodus
+# Für Markierung des Rechtecks im Fokusmodus
 y_start, x_start, x_end, y_end = 0, 0, 0, 0
 rect_id = None
 
@@ -272,7 +274,7 @@ rect_id = None
 panel = Canvas(main_frame)
 panel.img = img
 
-# Buttons, Slider und ander Bedinelemente für Modi erstellen
+# Buttons, Slider und ander Bedienelemente für Modi erstellen
 title_font = font.Font(family='Arial', size=16, weight='bold')
 
 options_label = Label(tool_frame, text="Modi", background="#2c2f33", fg="white", font=title_font)

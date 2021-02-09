@@ -1,31 +1,21 @@
 from detection import blur, mask
-import ssl
 import cv2
 import numpy as np
 import torch
 
 
 def pool(source, use_scale):
-    ssl._create_default_https_context = ssl._create_unverified_context
-
     img = cv2.imread(source)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    background_bokeh = blur.bokeh(np.asarray(img, dtype='uint8'))
 
     mak = predict(img, use_scale)
-    mak = mak / 255
+    mak = mak / 255.
     mask_inverted = np.abs(1. - mak)
 
-    r, g, b = cv2.split(img)
-    ir = r * mask_inverted
-    ig = g * mask_inverted
-    ib = b * mask_inverted
-    background = cv2.merge((ir, ig, ib))
+    subject = mask.apply_mask(img / 255., mak)
+    background = mask.apply_mask(img=background_bokeh / 255., mask=mask_inverted)
 
-    subject = mask.apply_mask(img/255, mak)
-    background_bokeh = blur.bokeh(np.asarray(background, dtype='uint8'))
-    background_bokeh = np.asarray(background_bokeh * 255, dtype='uint8')
-    result = cv2.addWeighted(subject, 1., background_bokeh, 1., 0)
-
+    result = subject + background
     return result
 
 

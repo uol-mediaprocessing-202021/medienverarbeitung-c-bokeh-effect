@@ -2,7 +2,7 @@ from tkinter import messagebox
 from PIL import Image
 from functions import global_vars
 from detection import pool
-from detection import torch
+from detection import rcnn
 import numpy as np
 import time
 import threading
@@ -82,6 +82,6 @@ def process_image(edge_var, x, scale_var):
         global_vars.progress_bar_check = True
         return blur_img
     else:
-        blur_img = torch.torch_blur(x)
+        blur_img = rcnn.rcnn_blur(x)
         global_vars.progress_bar_check = True
         return blur_img

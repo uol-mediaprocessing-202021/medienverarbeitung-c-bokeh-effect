@@ -11,9 +11,9 @@ def show_segmentation(image, original, num_segments):
     return result
 
 
-def edit_segment(image, original, num_segments, x_start, x_end, y_start, y_end, do_blur):
+def edit_segment(image, original, num_segments, x_start, x_end, y_start, y_end, do_blur, blur_style, blur_dim):
     if do_blur:
-        background = blur.bokeh(original)
+        background = blur.bokeh(original, blur_style, blur_dim)
     else:
         background = original
 

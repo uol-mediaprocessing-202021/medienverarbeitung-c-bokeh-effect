@@ -5,9 +5,9 @@ import torchvision
 from detection import blur, mask
 
 
-def rcnn_blur(source):
+def rcnn_blur(source, blur_style, blur_dim):
     img = cv2.imread(source)
-    background_bokeh = blur.bokeh(np.asarray(img, dtype='uint8'))
+    background_bokeh = blur.bokeh(np.asarray(img, dtype='uint8'), blur_style, blur_dim)
 
     model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
     model.eval()

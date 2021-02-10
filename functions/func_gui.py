@@ -64,24 +64,26 @@ def bar(progress, frame):
 
 # Class for ImageProcessing_Thread
 class IPThread(threading.Thread):
-    def __init__(self, edge_var, x, scale_var, que):
+    def __init__(self, edge_var, x, scale_var, blur_style, blur_dim, que):
         threading.Thread.__init__(self)
         self.edge_var = edge_var
         self.x = x
         self.scale_var = scale_var
+        self.blur_style = blur_style
+        self.blur_dim = blur_dim
         self.que = que
 
     def run(self):
         time.sleep(0.5)
-        self.que.put(process_image(self.edge_var, self.x, self.scale_var))
+        self.que.put(process_image(self.edge_var, self.x, self.scale_var, self.blur_style, self.blur_dim))
 
 
-def process_image(edge_var, x, scale_var):
+def process_image(edge_var, x, scale_var, blur_style, blur_dim):
     if edge_var == 0:
-        blur_img = pool.pool(x, scale_var)
+        blur_img = pool.pool(x, scale_var, blur_style, blur_dim)
         global_vars.progress_bar_check = True
         return blur_img
     else:
-        blur_img = rcnn.rcnn_blur(x)
+        blur_img = rcnn.rcnn_blur(x, blur_style, blur_dim)
         global_vars.progress_bar_check = True
         return blur_img

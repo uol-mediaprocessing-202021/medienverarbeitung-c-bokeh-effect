@@ -4,9 +4,9 @@ import numpy as np
 import torch
 
 
-def pool(source, use_scale):
+def pool(source, use_scale, blur_style, blur_dim):
     img = cv2.imread(source)
-    background_bokeh = blur.bokeh(np.asarray(img, dtype='uint8'))
+    background_bokeh = blur.bokeh(np.asarray(img, dtype='uint8'), blur_style, blur_dim)
 
     mak = predict(img, use_scale)
     mak = mak / 255.

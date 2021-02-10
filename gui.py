@@ -62,7 +62,7 @@ def save_image():
 
 # bearbeitet Bild mit Torch oder PoolNet
 def blur_image():
-    global x, img, edge_var, scale_var, info_frame, version_label, sec_edit
+    global x, img, edge_var, scale_var, info_frame, version_label, sec_edit, blur_style, blur_dim
     global auto_mode, focus_mode
 
     auto_mode.config(background="#23272a")
@@ -72,7 +72,7 @@ def blur_image():
 
     # erstellt einen Thread auf dem die Bildbearbeitung statt findet
     try:
-        image_thread = func_gui.IPThread(edge_var.get(), x, scale_var.get(), que)
+        image_thread = func_gui.IPThread(edge_var.get(), x, scale_var.get(), blur_style, blur_dim, que)
         image_thread.start()
     except KeyboardInterrupt:
         print("[Error] unable to start ImageProcessing_Thread")
@@ -157,12 +157,12 @@ def update_sel_rect(event):
 
 def blur_area(event):
     global rect_id, panel, sec_edit, img, ori_img
-    global x_start, y_start, x_end, y_end, slider_var, check_var
+    global x_start, y_start, x_end, y_end, slider_var, check_var, blur_style, blur_dim
 
     original_img = cv2.imread(x)
 
     # editiere die ausgewählten segmente
-    sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), x_start, x_end, y_start, y_end, check_var.get())
+    sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), x_start, x_end, y_start, y_end, check_var.get(), blur_style, blur_dim)
 
     # konvertiere Ergebnis in PhotImage und zeige an
     result = Image.fromarray(cv2.cvtColor(sec_edit, cv2.COLOR_BGR2RGB).astype(numpy.uint8))

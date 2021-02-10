@@ -16,7 +16,7 @@ from functions import func_gui, global_vars
 
 # Bilder öffnen
 def open_image():
-    global img, ori_img, x, blur_img, sec_edit
+    global img, ori_img, x, blur_img, sec_edit, blur_style, blur_dim
     global panel, file_menu, info_label
     global ori_resize
 
@@ -35,7 +35,7 @@ def open_image():
     panel.create_image(0, 0, image=img, anchor=NW)
     panel.place(anchor="center", relx=0.5, rely=0.5)
 
-    blur_img = blur.bokeh(cv2.imread(x))
+    blur_img = blur.bokeh(cv2.imread(x), blur_style, blur_dim)
     sec_edit = cv2.imread(x)
 
     # infoleiste updaten und speichern unter ermöglichen
@@ -108,6 +108,7 @@ def blur_image():
 def reset_image():
     global panel, img, ori_img, ori_resize
     global blur_img, sec_edit
+    global blur_type, blur_dim
 
     img = ori_img
 
@@ -115,7 +116,7 @@ def reset_image():
         img = ori_resize
         img = ImageTk.PhotoImage(img)
 
-    blur_img = blur.bokeh(cv2.imread(x))
+    blur_img = blur.bokeh(cv2.imread(x), blur_type, blur_dim)
     sec_edit = cv2.imread(x)
 
     panel.config(width=img.width(), height=img.height())
@@ -311,7 +312,7 @@ focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, 
 focus_mode.pack(padx=30, pady=20, fill=BOTH)
 
 slider_var = DoubleVar()
-slider = Scale(tool_frame, from_=5, to=205, bg="#2c2f33", bd=3, fg="white", troughcolor="#3a3e43",
+slider = Scale(tool_frame, from_=5, to=1000, bg="#2c2f33", bd=3, fg="white", troughcolor="#3a3e43",
                length=80, sliderlength=20, variable=slider_var, resolution=5, highlightbackground="#2c2f33",
                activebackground="#2c2f33")
 slider.set(100)

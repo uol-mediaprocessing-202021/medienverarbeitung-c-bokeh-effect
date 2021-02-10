@@ -42,8 +42,8 @@ def defocus_blur(img, style, dim):
     return cv2.filter2D(img, -1, kernel)
 
 
-# test = cv2.imread('Tiefer-Blick-in-den-Kosmos.jpg')
-# test_blurred = bokeh(test, 1, 51)
+# test = cv2.imread('fairy-lights-main.jpg')
+# test_blurred = bokeh(test, 0, 21)
 # # lookUpTable1 = np.empty((1, 256), np.uint8)
 # # lookUpTable2 = np.empty((1, 256), np.uint8)
 # # for i in range(256):
@@ -53,8 +53,8 @@ def defocus_blur(img, style, dim):
 # # bokeh = defocus_blur(test, 9)
 # # bokeh = cv2.LUT(bokeh, lookUpTable2)
 # # test_blurred = defocus_blur(test, 9)
-# cv2.imshow('Original', test)
-# cv2.imshow('Gaussian', cv2.GaussianBlur(test, (7, 7), 0))
+# # cv2.imshow('Original', test)
+# # cv2.imshow('Gaussian', cv2.GaussianBlur(test, (7, 7), 0))
 # # cv2.imshow('test', defocus_blur(test, 15))
 # cv2.imshow('Test', test_blurred)
 # cv2.waitKey(0)

@@ -6,16 +6,20 @@ import torch
 
 def pool(source, use_scale, blur_style, blur_dim):
     img = cv2.imread(source)
-    background_bokeh = blur.bokeh(np.asarray(img, dtype='uint8'), blur_style, blur_dim)
 
     mak = predict(img, use_scale)
     mak = mak / 255.
     mask_inverted = np.abs(1. - mak)
 
     subject = mask.apply_mask(img / 255., mak)
-    background = mask.apply_mask(img=background_bokeh / 255., mask=mask_inverted)
+    background = mask.apply_mask(img=img / 255., mask=mask_inverted)
+    subject = cv2.cvtColor(subject, cv2.COLOR_BGRA2BGR)
+    background_bokeh = blur.bokeh(np.asarray(background, dtype='uint8'), blur_style, blur_dim)
+    background_bokeh = cv2.cvtColor(background_bokeh, cv2.COLOR_BGRA2BGR)
+    background_bokeh = mask.apply_mask(background_bokeh / 255, mask_inverted)
+    background_bokeh = cv2.cvtColor(background_bokeh, cv2.COLOR_BGRA2BGR)
 
-    result = subject + background
+    result = subject + background_bokeh
     return result
 
 

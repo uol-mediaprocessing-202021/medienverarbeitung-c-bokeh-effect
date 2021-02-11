@@ -14,7 +14,7 @@ def help_about():
 Projekt: Medienverarbeitung Gruppe C\n\
 Carl-von-Ossietzky Universität Oldenburg\n\
 Authors: Jona Schrader, Roman Kammer, Malte Trauernicht\n\
-Version: Alpha 0.01"
+Version: 1.0.0"
     messagebox.showinfo(message=about_text, title="Über das Projekt")
 
 

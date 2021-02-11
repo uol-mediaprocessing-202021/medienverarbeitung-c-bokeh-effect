@@ -35,7 +35,7 @@ def open_image():
     panel.create_image(0, 0, image=img, anchor=NW)
     panel.place(anchor="center", relx=0.5, rely=0.5)
 
-    blur_img = blur.bokeh(cv2.imread(x), blur_style, blur_dim)
+    blur_img = blur.bokeh(cv2.imread(x), blur_style, blur_dim.get())
     sec_edit = cv2.imread(x)
 
     # infoleiste updaten und speichern unter ermöglichen
@@ -72,7 +72,7 @@ def blur_image():
 
     # erstellt einen Thread auf dem die Bildbearbeitung statt findet
     try:
-        image_thread = func_gui.IPThread(edge_var.get(), x, scale_var.get(), blur_style, blur_dim, que)
+        image_thread = func_gui.IPThread(edge_var.get(), x, scale_var.get(), blur_style, blur_dim.get(), que)
         image_thread.start()
     except KeyboardInterrupt:
         print("[Error] unable to start ImageProcessing_Thread")
@@ -108,7 +108,7 @@ def blur_image():
 def reset_image():
     global panel, img, ori_img, ori_resize
     global blur_img, sec_edit
-    global blur_type, blur_dim
+    global blur_style, blur_dim
 
     img = ori_img
 
@@ -116,7 +116,7 @@ def reset_image():
         img = ori_resize
         img = ImageTk.PhotoImage(img)
 
-    blur_img = blur.bokeh(cv2.imread(x), blur_type, blur_dim)
+    blur_img = blur.bokeh(cv2.imread(x), blur_style, blur_dim.get())
     sec_edit = cv2.imread(x)
 
     panel.config(width=img.width(), height=img.height())
@@ -163,7 +163,8 @@ def blur_area(event):
     original_img = cv2.imread(x)
 
     # editiere die ausgewählten segmente
-    sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), x_start, x_end, y_start, y_end, check_var.get(), blur_style, blur_dim)
+    sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), x_start, x_end, y_start, y_end,
+                                 check_var.get(), blur_style, blur_dim.get())
 
     # konvertiere Ergebnis in PhotImage und zeige an
     result = Image.fromarray(cv2.cvtColor(sec_edit, cv2.COLOR_BGR2RGB).astype(numpy.uint8))
@@ -233,6 +234,11 @@ def resize_image(image):
         return image
 
 
+def change_blur_style(value):
+    global blur_style
+    blur_style = value
+
+
 # Äußeres Fenster erstellen
 root = Tk()
 root.iconbitmap('images/camera.ico')
@@ -244,6 +250,7 @@ win_h = root.winfo_screenheight()
 root.geometry('%sx%s' % (int(win_w/1.5), int(win_h/1.5)))
 
 # Innere Fenster erstellen
+
 info_frame = Frame(root, background="#23272a")
 info_frame.pack(side=BOTTOM, fill=BOTH)
 
@@ -253,10 +260,17 @@ tool_frame.pack(side=LEFT, fill=BOTH)
 main_frame = Frame(root, background="#3a3e43")
 main_frame.pack(side=LEFT, fill=BOTH, expand=True)
 
+effect_frame = Frame(root, background="#2c2f33")
+effect_frame.pack(side=LEFT, fill=BOTH)
+
 # Icons für Buttons laden
 noe = ImageTk.PhotoImage(Image.open("images/tool_icons/revert.png").resize((35, 35), Image.ANTIALIAS))
 foc = ImageTk.PhotoImage(Image.open("images/mode_icons/focus.png").resize((35, 35), Image.ANTIALIAS))
 auto = ImageTk.PhotoImage(Image.open("images/mode_icons/auto.png").resize((35, 35), Image.ANTIALIAS))
+
+round_i = ImageTk.PhotoImage(Image.open("images/tool_icons/circles.png").resize((35, 35), Image.ANTIALIAS))
+ring_i = ImageTk.PhotoImage(Image.open("images/tool_icons/rings.png").resize((35, 35), Image.ANTIALIAS))
+cross_i = ImageTk.PhotoImage(Image.open("images/tool_icons/cross.png").resize((35, 35), Image.ANTIALIAS))
 
 # reserviere Speicherplatz für zu bearbeitendes Bild und Kopie für reset
 x = 'images/placeholder.png'
@@ -269,15 +283,17 @@ sec_edit = cv2.imread(x)
 # Für Markierung des Rechtecks im Fokusmodus
 y_start, x_start, x_end, y_end = 0, 0, 0, 0
 rect_id = None
+blur_style = 2
 
 # Label für Bilddarstellung
 panel = Canvas(main_frame)
 panel.img = img
 
-# Buttons, Slider und ander Bedienelemente für Modi erstellen
+# Fonts für Bedienelemente
 label_font = font.Font(family='Arial', size=10, weight='bold')
 title_font = font.Font(family='Arial', size=20, weight='bold')
 
+# Buttons, Slider und ander Bedienelemente für Modi erstellen
 title_label = Label(tool_frame, text="Modi", background="#2c2f33", fg="white", font=title_font)
 title_label.pack(pady=30)
 
@@ -316,7 +332,7 @@ slider = Scale(tool_frame, from_=5, to=1000, bg="#2c2f33", bd=3, fg="white", tro
                length=80, sliderlength=20, variable=slider_var, resolution=5, highlightbackground="#2c2f33",
                activebackground="#2c2f33")
 slider.set(100)
-slider.pack(padx=15, pady=20, fill=BOTH)
+slider.pack(padx=10, pady=20, fill=BOTH)
 
 check_var = BooleanVar()
 check_var.set(True)
@@ -327,6 +343,45 @@ check.select()
 
 sep3 = Separator(tool_frame, orient=HORIZONTAL)
 sep3.pack(padx=5, pady=5, fill=BOTH)
+
+# Buttons, Slider und ander Bedienelemente für Effekte erstellen
+effect_label = Label(effect_frame, text="Bokeh", background="#2c2f33", fg="white", font=title_font)
+effect_label.pack(pady=30, padx=15)
+
+type_label = Label(effect_frame, text="Effekt-Typ", background="#2c2f33", fg="white", font=label_font)
+type_label.pack()
+
+sepr = Separator(effect_frame, orient=HORIZONTAL)
+sepr.pack(padx=5, fill=BOTH)
+
+round_button = Button(effect_frame, image=round_i, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                      command=lambda *args: change_blur_style(2))
+round_button.pack(padx=30, pady=25, fill=BOTH)
+
+ring_button = Button(effect_frame, image=ring_i, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                     command=lambda *args: change_blur_style(1))
+ring_button.pack(padx=30, pady=25, fill=BOTH)
+
+cross_button = Button(effect_frame, image=cross_i, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
+                      command=lambda *args: change_blur_style(0))
+cross_button.pack(padx=30, pady=30, fill=BOTH)
+
+blur_label = Label(effect_frame, text="Effekt-Stärke", background="#2c2f33", fg="white", font=label_font)
+blur_label.pack()
+
+sepr1 = Separator(effect_frame, orient=HORIZONTAL)
+sepr1.pack(padx=5, fill=BOTH)
+
+blur_dim = IntVar()
+slider = Scale(effect_frame, from_=5, to=50, bg="#2c2f33", bd=3, fg="white", troughcolor="#3a3e43",
+               length=80, sliderlength=20, variable=blur_dim, resolution=5, highlightbackground="#2c2f33",
+               activebackground="#2c2f33")
+slider.set(10)
+slider.pack(padx=30, pady=20, fill=BOTH)
+
+sepr2 = Separator(effect_frame, orient=HORIZONTAL)
+sepr2.pack(padx=5, fill=BOTH)
+
 
 # label für Bildinfo erstellen
 info_label = Label(info_frame, background="#23272a", fg="white")
@@ -346,7 +401,6 @@ edge_menu = Menu(setup_menu, tearoff=0)
 scale_menu = Menu(setup_menu, tearoff=0)
 
 # Unterreiter für 'Datei'
-file_menu.add_command(label="Neu ...")
 file_menu.add_command(label="Öffnen ...", command=open_image)
 file_menu.add_command(label="Speichern unter ...", command=save_image, state="disabled")
 file_menu.add_separator()

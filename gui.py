@@ -40,6 +40,7 @@ def open_image():
 
         blur_img = blur.bokeh(cv2.imread(x), blur_style, blur_dim.get())
         sec_edit = cv2.imread(x)
+        sec_edit = resize_image(sec_edit)
 
         # infoleiste updaten und speichern unter ermöglichen
         info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
@@ -125,6 +126,7 @@ def reset_image():
 
     blur_img = blur.bokeh(cv2.imread(x), blur_style, blur_dim.get())
     sec_edit = cv2.imread(x)
+    sec_edit = resize_image(sec_edit)
 
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
@@ -168,6 +170,7 @@ def blur_area(event):
     global x_start, y_start, x_end, y_end, slider_var, check_var, blur_style, blur_dim
 
     original_img = cv2.imread(x)
+    original_img = resize_image(original_img)
 
     # editiere die ausgewählten segmente
     sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), x_start, x_end, y_start, y_end,
@@ -200,6 +203,7 @@ def focus_blur():
 
     # erstelle segmentiertes Bild für Benuzer
     cv_img = cv2.imread(x)
+    cv_img = resize_image(cv_img)
     seg = slic.show_segmentation(sec_edit, cv_img, slider_var.get())
 
     # konvertiere und zeige an
@@ -235,10 +239,15 @@ def resize_image(image):
         new_w = int(max_h / aspect)
 
         # Skaliere Bild auf neue maße
-        result = image.resize((new_w, max_h), Image.ANTIALIAS)
+        if isinstance(image, numpy.ndarray):
+            result = cv2.resize(image, (new_w, max_h))
+        else:
+            result = image.resize((new_w, max_h), Image.ANTIALIAS)
+
         return result
     else:
         return image
+
 
 # passt die variable blur_style an damit richtige Unschärfe-Objekte gezeigt werden
 def change_blur_style(value):

@@ -459,7 +459,7 @@ menu.add_cascade(label="Einstellungen", menu=setup_menu)
 
 # Unterreiter für 'Hilfe'
 help_menu.add_command(label="Über das Projekt", command=func_gui.help_about)
-help_menu.add_command(label="Tutorial", command=func_gui.help_tut)
+help_menu.add_command(label="Colaboratory", command=func_gui.help_colab)
 menu.add_cascade(label="Hilfe", menu=help_menu)
 
 root.config(menu=menu)

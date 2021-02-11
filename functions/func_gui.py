@@ -19,12 +19,12 @@ Version: 1.0.0"
 
 
 # Text für Punkt 'Tutorial' im Reiter Hilfe
-def help_tut():
+def help_colab():
     about_text = "\
-1: Lade ein Bild unter Datei --> Öffnen...\n\
-2: Klicke auf den gewünschten Effekt in der Effektleiste\n\
-3: Speicher das Bild unter Datei --> Speichern unter..."
-    messagebox.showinfo(message=about_text, title="Tutorial")
+Google Colab Dokumentation des Projektes:\n\
+\n\
+https://colab.research.google.com/drive/16Y4wp7qCuzpu2yXUFqc7jMICxJSavPgH"
+    messagebox.showinfo(message=about_text, title="Colaboratory")
 
 
 # Konvertiere PIL.ImageTk aus Label in ein PIL.Image

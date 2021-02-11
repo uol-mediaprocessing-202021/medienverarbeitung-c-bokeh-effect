@@ -18,7 +18,7 @@ from functions import func_gui, global_vars
 def open_image():
     global img, ori_img, x, blur_img, sec_edit, blur_style, blur_dim
     global panel, file_menu, info_label
-    global ori_resize
+    global ori_resize, auto_mode, focus_mode, revert_button
 
     # Bild laden und in canvas (panel) speichern
     x = filedialog.askopenfilename(title='Bild öffnen')
@@ -42,6 +42,10 @@ def open_image():
     info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
 
     file_menu.entryconfig("Speichern unter ...", state="normal")
+
+    auto_mode.config(state=NORMAL)
+    focus_mode.config(state=NORMAL)
+    revert_button.config(state=NORMAL)
 
 
 # Bilder speichern
@@ -233,10 +237,25 @@ def resize_image(image):
     else:
         return image
 
-
+# passt die variable blur_style an damit richtige Unschärfe-Objekte gezeigt werden
 def change_blur_style(value):
-    global blur_style
+    global blur_style, round_button, ring_button, cross_button
+
     blur_style = value
+
+    # Hintergrundfarbe der passenden Buttons wird geändert
+    if blur_style == 0:
+        cross_button.config(background="#23272a")
+        ring_button.config(background="#2c2f33")
+        round_button.config(background="#2c2f33")
+    elif blur_style == 1:
+        cross_button.config(background="#2c2f33")
+        ring_button.config(background="#23272a")
+        round_button.config(background="#2c2f33")
+    else:
+        cross_button.config(background="#2c2f33")
+        ring_button.config(background="#2c2f33")
+        round_button.config(background="#23272a")
 
 
 # Äußeres Fenster erstellen
@@ -295,7 +314,7 @@ title_font = font.Font(family='Arial', size=20, weight='bold')
 
 # Buttons, Slider und ander Bedienelemente für Modi erstellen
 title_label = Label(tool_frame, text="Modi", background="#2c2f33", fg="white", font=title_font)
-title_label.pack(pady=30)
+title_label.pack(pady=35)
 
 revert_label = Label(tool_frame, text="Zurücksetzen", background="#2c2f33", fg="white", font=label_font)
 revert_label.pack()
@@ -304,7 +323,7 @@ sep = Separator(tool_frame, orient=HORIZONTAL)
 sep.pack(padx=5, fill=BOTH)
 
 revert_button = Button(tool_frame, image=noe, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                       command=reset_image)
+                       command=reset_image, state=DISABLED)
 revert_button.pack(padx=30, pady=30, fill=BOTH)
 
 auto_label = Label(tool_frame, text="Auto-Modus", background="#2c2f33", fg="white", font=label_font)
@@ -314,7 +333,8 @@ sep1 = Separator(tool_frame, orient=HORIZONTAL)
 sep1.pack(padx=5, fill=BOTH)
 
 auto_mode = Button(tool_frame, image=auto, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                   font=title_font, fg="white", command=blur_image, relief="sunken", height=40, width=40)
+                   font=title_font, fg="white", command=blur_image, relief="sunken", height=40, width=40,
+                   state=DISABLED)
 auto_mode.pack(padx=30, pady=30, fill=BOTH)
 
 focus_label = Label(tool_frame, text="Fokus-Modus", background="#2c2f33", fg="white", font=label_font)
@@ -324,7 +344,8 @@ sep2 = Separator(tool_frame, orient=HORIZONTAL)
 sep2.pack(padx=5, fill=BOTH)
 
 focus_mode = Button(tool_frame, image=foc, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                    font=title_font, fg="white", command=focus_blur, relief="sunken", height=40, width=40)
+                    font=title_font, fg="white", command=focus_blur, relief="sunken", height=40, width=40,
+                    state=DISABLED)
 focus_mode.pack(padx=30, pady=20, fill=BOTH)
 
 slider_var = DoubleVar()
@@ -346,7 +367,7 @@ sep3.pack(padx=5, pady=5, fill=BOTH)
 
 # Buttons, Slider und ander Bedienelemente für Effekte erstellen
 effect_label = Label(effect_frame, text="Bokeh", background="#2c2f33", fg="white", font=title_font)
-effect_label.pack(pady=30, padx=15)
+effect_label.pack(pady=35, padx=15)
 
 type_label = Label(effect_frame, text="Effekt-Typ", background="#2c2f33", fg="white", font=label_font)
 type_label.pack()
@@ -354,16 +375,16 @@ type_label.pack()
 sepr = Separator(effect_frame, orient=HORIZONTAL)
 sepr.pack(padx=5, fill=BOTH)
 
-round_button = Button(effect_frame, image=round_i, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                      command=lambda *args: change_blur_style(2))
-round_button.pack(padx=30, pady=25, fill=BOTH)
+round_button = Button(effect_frame, image=round_i, background="#23272a", borderwidth=0, activebackground="#2c2f33",
+                      command=lambda *args: change_blur_style(2), height=40, width=40, relief="sunken")
+round_button.pack(padx=30, pady=30, fill=BOTH)
 
 ring_button = Button(effect_frame, image=ring_i, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                     command=lambda *args: change_blur_style(1))
-ring_button.pack(padx=30, pady=25, fill=BOTH)
+                     command=lambda *args: change_blur_style(1), height=40, width=40, relief="sunken")
+ring_button.pack(padx=30, pady=30, fill=BOTH)
 
 cross_button = Button(effect_frame, image=cross_i, background="#2c2f33", borderwidth=0, activebackground="#2c2f33",
-                      command=lambda *args: change_blur_style(0))
+                      command=lambda *args: change_blur_style(0), height=40, width=40, relief="sunken")
 cross_button.pack(padx=30, pady=30, fill=BOTH)
 
 blur_label = Label(effect_frame, text="Effekt-Stärke", background="#2c2f33", fg="white", font=label_font)
@@ -373,7 +394,7 @@ sepr1 = Separator(effect_frame, orient=HORIZONTAL)
 sepr1.pack(padx=5, fill=BOTH)
 
 blur_dim = IntVar()
-slider = Scale(effect_frame, from_=5, to=50, bg="#2c2f33", bd=3, fg="white", troughcolor="#3a3e43",
+slider = Scale(effect_frame, from_=5, to=25, bg="#2c2f33", bd=3, fg="white", troughcolor="#3a3e43",
                length=80, sliderlength=20, variable=blur_dim, resolution=5, highlightbackground="#2c2f33",
                activebackground="#2c2f33")
 slider.set(10)

@@ -22,30 +22,33 @@ def open_image():
 
     # Bild laden und in canvas (panel) speichern
     x = filedialog.askopenfilename(title='Bild öffnen')
-    img = Image.open(x)
-    ori_img = ImageTk.PhotoImage(img)
 
-    # Bild bei bedarf resizen und in PhotoImage convertieren
-    img = resize_image(img)
-    ori_resize = img
-    img = ImageTk.PhotoImage(img)
+    if x != '':
+        img = Image.open(x)
 
-    # Bild in der Anwendung anzeigen
-    panel.config(width=img.width(), height=img.height())
-    panel.create_image(0, 0, image=img, anchor=NW)
-    panel.place(anchor="center", relx=0.5, rely=0.5)
+        ori_img = ImageTk.PhotoImage(img)
 
-    blur_img = blur.bokeh(cv2.imread(x), blur_style, blur_dim.get())
-    sec_edit = cv2.imread(x)
+        # Bild bei bedarf resizen und in PhotoImage convertieren
+        img = resize_image(img)
+        ori_resize = img
+        img = ImageTk.PhotoImage(img)
 
-    # infoleiste updaten und speichern unter ermöglichen
-    info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
+        # Bild in der Anwendung anzeigen
+        panel.config(width=img.width(), height=img.height())
+        panel.create_image(0, 0, image=img, anchor=NW)
+        panel.place(anchor="center", relx=0.5, rely=0.5)
 
-    file_menu.entryconfig("Speichern unter ...", state="normal")
+        blur_img = blur.bokeh(cv2.imread(x), blur_style, blur_dim.get())
+        sec_edit = cv2.imread(x)
 
-    auto_mode.config(state=NORMAL)
-    focus_mode.config(state=NORMAL)
-    revert_button.config(state=NORMAL)
+        # infoleiste updaten und speichern unter ermöglichen
+        info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
+
+        file_menu.entryconfig("Speichern unter ...", state="normal")
+
+        auto_mode.config(state=NORMAL)
+        focus_mode.config(state=NORMAL)
+        revert_button.config(state=NORMAL)
 
 
 # Bilder speichern

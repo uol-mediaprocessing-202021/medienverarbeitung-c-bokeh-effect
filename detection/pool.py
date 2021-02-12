@@ -6,17 +6,10 @@ import torch
 
 def pool(source, use_scale, blur_style, blur_dim):
     img = cv2.imread(source)
-    background_bokeh = blur.bokeh(np.asarray(img, dtype='uint8'), blur_style, blur_dim)
 
-    mak = predict(img, use_scale)
-    mak = mak / 255.
-    mask_inverted = np.abs(1. - mak)
+    mak = np.asarray(predict(img, use_scale), dtype='uint8')
 
-    subject = mask.apply_mask(img / 255., mak)
-    background = mask.apply_mask(img=background_bokeh / 255., mask=mask_inverted)
-
-    result = subject + background
-    return result
+    return mask.apply_mask(img, mak, blur_style, blur_dim)
 
 
 def compress_image(img):

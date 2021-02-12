@@ -20,6 +20,8 @@ def open_image():
     global panel, file_menu, info_label
     global ori_resize, auto_mode, focus_mode, revert_button
 
+    global_vars.img_is_scaled = False
+
     # Bild laden und in canvas (panel) speichern
     x = filedialog.askopenfilename(title='Bild öffnen')
 
@@ -40,10 +42,9 @@ def open_image():
 
         blur_img = blur.bokeh(cv2.imread(x), blur_style, blur_dim.get())
         sec_edit = cv2.imread(x)
-        sec_edit = resize_image(sec_edit)
 
         # infoleiste updaten und speichern unter ermöglichen
-        info_label.config(text="Datei: " + x + " | " + "Size: " + str(img.height()) + ' x ' + str(img.width()))
+        info_label.config(text="Datei: " + x + " | " + "Size: " + str(ori_img.height()) + ' x ' + str(ori_img.width()))
 
         file_menu.entryconfig("Speichern unter ...", state="normal")
 
@@ -120,13 +121,13 @@ def reset_image():
 
     img = ori_img
 
-    if (ori_img.width() >= int(win_w * 0.7)) or (ori_img.height() >= int(win_h * 0.7)):
+    if (ori_img.width() >= int(win_w * global_vars.scale_fac)) or \
+            (ori_img.height() >= int(win_h * global_vars.scale_fac)):
         img = ori_resize
         img = ImageTk.PhotoImage(img)
 
     blur_img = blur.bokeh(cv2.imread(x), blur_style, blur_dim.get())
     sec_edit = cv2.imread(x)
-    sec_edit = resize_image(sec_edit)
 
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
@@ -170,7 +171,10 @@ def blur_area(event):
     global x_start, y_start, x_end, y_end, slider_var, check_var, blur_style, blur_dim
 
     original_img = cv2.imread(x)
-    original_img = resize_image(original_img)
+
+    print('--COORDS_BEFORE--')
+    print(x_start, x_end, y_start, y_end)
+    print()
 
     # editiere die ausgewählten segmente
     sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), x_start, x_end, y_start, y_end,
@@ -203,7 +207,6 @@ def focus_blur():
 
     # erstelle segmentiertes Bild für Benuzer
     cv_img = cv2.imread(x)
-    cv_img = resize_image(cv_img)
     seg = slic.show_segmentation(sec_edit, cv_img, slider_var.get())
 
     # konvertiere und zeige an
@@ -227,9 +230,8 @@ def resize_image(image):
     global ori_img, win_w, win_h
 
     # Berechne die Maximal Höhe und Breite des Bildes in relation zur Bildschirmgröße
-    scale_fac = 0.7
-    max_w = int(win_w * scale_fac)
-    max_h = int(win_h * scale_fac)
+    max_w = int(win_w * global_vars.scale_fac)
+    max_h = int(win_h * global_vars.scale_fac)
 
     # Skaliere wenn Bild zu groß für Anwendungsfenster
     if (ori_img.width() >= max_w) or (ori_img.height() >= max_h):
@@ -244,6 +246,7 @@ def resize_image(image):
         else:
             result = image.resize((new_w, max_h), Image.ANTIALIAS)
 
+        global_vars.img_is_scaled = True
         return result
     else:
         return image

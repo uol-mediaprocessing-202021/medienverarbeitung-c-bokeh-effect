@@ -3,7 +3,6 @@ from skimage.segmentation import mark_boundaries
 from skimage.segmentation import slic
 
 from detection import blur
-from functions import global_vars
 
 
 def show_segmentation(image, original, num_segments):
@@ -13,24 +12,6 @@ def show_segmentation(image, original, num_segments):
 
 
 def edit_segment(image, original, num_segments, x_start, x_end, y_start, y_end, do_blur, blur_style, blur_dim):
-    scale_equilizer = 1 - global_vars.scale_fac
-    trunc_se = f"{scale_equilizer:.2f}"
-    scale_equilizer = float(trunc_se)
-    print('--Scale: ' + str(scale_equilizer))
-    print()
-
-    if global_vars.img_is_scaled:
-        x_start = int(x_start + (x_start * scale_equilizer))
-        x_end = int(x_end + (x_end * scale_equilizer))
-        y_start = int(y_start + (y_start * scale_equilizer))
-        y_end = int(y_end + (y_end * scale_equilizer))
-
-    print('--COORDS_AFTER--')
-    print(x_start, x_end, y_start, y_end)
-    print()
-    print('--Img_Shape--')
-    print(image.shape)
-
     if do_blur:
         background = blur.bokeh(original, blur_style, blur_dim)
     else:

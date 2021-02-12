@@ -55,7 +55,7 @@ def open_image():
 
 # Bilder speichern
 def save_image():
-    global img, x
+    global img, x, sec_edit
 
     # Benutzer sucht pfad und name zum speichern aus
     y = filedialog.asksaveasfilename(title='Bild speichern unter', filetypes=(
@@ -64,9 +64,7 @@ def save_image():
         ("Alle Dateien", "*.*"),
     ), defaultextension=os.path.splitext(x), initialfile=os.path.basename(x))
 
-    # Konvertiere in speicherbares Dateiformat und speichere
-    new_image = func_gui.covert_imgtk2img(img)
-    new_image.save(y)
+    cv2.imwrite(y, sec_edit)
 
 
 # bearbeitet Bild mit Torch oder PoolNet
@@ -167,17 +165,13 @@ def update_sel_rect(event):
 
 
 def blur_area(event):
-    global rect_id, panel, sec_edit, img, ori_img
+    global rect_id, panel, sec_edit, img, ori_img, image_scale
     global x_start, y_start, x_end, y_end, slider_var, check_var, blur_style, blur_dim
 
     original_img = cv2.imread(x)
 
-    print('--COORDS_BEFORE--')
-    print(x_start, x_end, y_start, y_end)
-    print()
-
     # editiere die ausgewählten segmente
-    sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), x_start, x_end, y_start, y_end,
+    sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), int(x_start / image_scale), int(x_end / image_scale), int(y_start / image_scale), int(y_end / image_scale),
                                  check_var.get(), blur_style, blur_dim.get())
 
     # konvertiere Ergebnis in PhotImage und zeige an
@@ -227,11 +221,13 @@ def focus_blur():
 
 # Skaliert Bilder wenn diese Größer als das Fenster sind
 def resize_image(image):
-    global ori_img, win_w, win_h
+    global ori_img, win_w, win_h, image_scale
 
     # Berechne die Maximal Höhe und Breite des Bildes in relation zur Bildschirmgröße
     max_w = int(win_w * global_vars.scale_fac)
     max_h = int(win_h * global_vars.scale_fac)
+
+    image_scale = 1
 
     # Skaliere wenn Bild zu groß für Anwendungsfenster
     if (ori_img.width() >= max_w) or (ori_img.height() >= max_h):
@@ -247,6 +243,7 @@ def resize_image(image):
             result = image.resize((new_w, max_h), Image.ANTIALIAS)
 
         global_vars.img_is_scaled = True
+        image_scale = new_w / ori_img.width()
         return result
     else:
         return image

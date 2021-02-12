@@ -171,7 +171,8 @@ def blur_area(event):
     original_img = cv2.imread(x)
 
     # editiere die ausgewählten segmente
-    sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), int(x_start / image_scale), int(x_end / image_scale), int(y_start / image_scale), int(y_end / image_scale),
+    sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), int(x_start / image_scale),
+                                 int(x_end / image_scale), int(y_start / image_scale), int(y_end / image_scale),
                                  check_var.get(), blur_style, blur_dim.get())
 
     # konvertiere Ergebnis in PhotImage und zeige an
@@ -315,6 +316,7 @@ sec_edit = cv2.imread(x)
 y_start, x_start, x_end, y_end = 0, 0, 0, 0
 rect_id = None
 blur_style = 2
+image_scale = 1
 
 # Label für Bilddarstellung
 panel = Canvas(main_frame)

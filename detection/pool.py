@@ -1,28 +1,19 @@
-from detection import blur, mask
+from detection import mask
 import cv2
 import numpy as np
 import torch
 
 
+# Pool-Algorithmus
 def pool(source, use_scale, blur_style, blur_dim):
     img = cv2.imread(source)
 
-    mak = predict(img, use_scale)
-    mak = mak / 255.
-    mask_inverted = np.abs(1. - mak)
+    mak = np.asarray(predict(img, use_scale), dtype='uint8')
 
-    subject = mask.apply_mask(img / 255., mak)
-    background = mask.apply_mask(img=img / 255., mask=mask_inverted)
-    subject = cv2.cvtColor(subject, cv2.COLOR_BGRA2BGR)
-    background_bokeh = blur.bokeh(np.asarray(background, dtype='uint8'), blur_style, blur_dim)
-    background_bokeh = cv2.cvtColor(background_bokeh, cv2.COLOR_BGRA2BGR)
-    background_bokeh = mask.apply_mask(background_bokeh / 255, mask_inverted)
-    background_bokeh = cv2.cvtColor(background_bokeh, cv2.COLOR_BGRA2BGR)
-
-    result = subject + background_bokeh
-    return result
+    return mask.apply_mask(img, mak, blur_style, blur_dim)
 
 
+# Passt Größe des Bildes für Kantenfindung an
 def compress_image(img):
     height, width = img.shape[:2]
 

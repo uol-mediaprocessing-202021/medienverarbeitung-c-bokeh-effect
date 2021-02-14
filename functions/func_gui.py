@@ -8,23 +8,23 @@ import time
 import threading
 
 
-# Text für Punkt 'Über das Projekt' im Reiter Hilfe
+# Text für Punkt 'Über das Projekt' im Reiter 'Hilfe'
 def help_about():
     about_text = "\
 Projekt: Medienverarbeitung Gruppe C\n\
 Carl-von-Ossietzky Universität Oldenburg\n\
 Authors: Jona Schrader, Roman Kammer, Malte Trauernicht\n\
-Version: Alpha 0.01"
+Version: 1.0.0"
     messagebox.showinfo(message=about_text, title="Über das Projekt")
 
 
-# Text für Punkt 'Tutorial' im Reiter Hilfe
-def help_tut():
+# Text für Punkt 'Tutorial' im Reiter 'Hilfe'
+def help_colab():
     about_text = "\
-1: Lade ein Bild unter Datei --> Öffnen...\n\
-2: Klicke auf den gewünschten Effekt in der Effektleiste\n\
-3: Speicher das Bild unter Datei --> Speichern unter..."
-    messagebox.showinfo(message=about_text, title="Tutorial")
+Google Colab Dokumentation des Projektes:\n\
+\n\
+https://colab.research.google.com/drive/16Y4wp7qCuzpu2yXUFqc7jMICxJSavPgH"
+    messagebox.showinfo(message=about_text, title="Colaboratory")
 
 
 # Konvertiere PIL.ImageTk aus Label in ein PIL.Image
@@ -36,12 +36,10 @@ def covert_imgtk2img(img):
             rgb[j, i, :] = img._PhotoImage__photo.get(x=i, y=j)
 
     new_img = Image.fromarray(rgb.astype('uint8'))
-    # new_img = new_img.convert("RGBA")
     return new_img
 
 
-# Function responsible for the updation
-# of the progress bar value
+# Setzt Position der grünen Linie im Ladebalken fest
 def bar(progress, frame):
 
     while not global_vars.progress_bar_check:
@@ -62,7 +60,7 @@ def bar(progress, frame):
                 break
 
 
-# Class for ImageProcessing_Thread
+# Klasse für ImageProcessing_Thread
 class IPThread(threading.Thread):
     def __init__(self, edge_var, x, scale_var, blur_style, blur_dim, que):
         threading.Thread.__init__(self)
@@ -78,6 +76,8 @@ class IPThread(threading.Thread):
         self.que.put(process_image(self.edge_var, self.x, self.scale_var, self.blur_style, self.blur_dim))
 
 
+# Function des ImageProcessing_Thread
+# Alle Veränderungen am Bild werden auf diesem Bild ausgeführt
 def process_image(edge_var, x, scale_var, blur_style, blur_dim):
     if edge_var == 0:
         blur_img = pool.pool(x, scale_var, blur_style, blur_dim)

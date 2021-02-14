@@ -1,16 +1,17 @@
 import numpy as np
 from skimage.segmentation import mark_boundaries
 from skimage.segmentation import slic
-
 from detection import blur
 
 
+# Zeichne Linien der Segmentierung auf das Bild
 def show_segmentation(image, original, num_segments):
     segments = slic(original, n_segments=num_segments, sigma=5, start_label=1)
     result = np.asarray(mark_boundaries(image, segments) * 255, dtype='uint8')
     return result
 
 
+# Setze Unschärfe auf die ausgewählten Segmente des Bildes
 def edit_segment(image, original, num_segments, x_start, x_end, y_start, y_end, do_blur, blur_style, blur_dim):
     if do_blur:
         background = blur.bokeh(original, blur_style, blur_dim)

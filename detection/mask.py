@@ -1,13 +1,21 @@
 import cv2
 import numpy as np
+from detection import blur
 
+# Wende Unschärfe auf Bild unter Verwendung der Maske
+def apply_mask(img, mask, blur_style, blur_dim):
+    mask_inverted = np.invert(mask)
+    mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    mask_inverted = cv2.cvtColor(mask_inverted, cv2.COLOR_GRAY2BGR)
 
-def apply_mask(img, mask):
-    b, g, r = cv2.split(img)
-    a = np.full_like(r, 1)
-    mb = b * mask
-    mg = g * mask
-    mr = r * mask
-    ma = a * mask
-    result = cv2.merge((mb, mg, mr, ma))
-    return np.asarray(result * 255., dtype='uint8')
+    subject = np.asarray(((img / 255) * (mask / 255)) * 255, dtype='uint8')
+    background = np.asarray(((img / 255) * (mask_inverted / 255)) * 255, dtype='uint8')
+
+    background_bokeh = np.asarray(blur.bokeh(background, blur_style, blur_dim), dtype='uint8')
+
+    background_bokeh = np.asarray(((background_bokeh / 255) * (mask_inverted / 255)) * 255, dtype='uint8')
+
+    result = subject + background_bokeh
+
+    return result
+  

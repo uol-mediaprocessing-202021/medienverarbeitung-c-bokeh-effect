@@ -1,8 +1,8 @@
 from tkinter import messagebox
 from PIL import Image
 from functions import global_vars
-from detection import pool
-from detection import rcnn
+from model import pool
+from model import rcnn
 import numpy as np
 import time
 import threading

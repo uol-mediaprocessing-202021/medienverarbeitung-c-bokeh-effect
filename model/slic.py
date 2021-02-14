@@ -1,7 +1,7 @@
 import numpy as np
 from skimage.segmentation import mark_boundaries
 from skimage.segmentation import slic
-from detection import blur
+from model import blur
 
 
 # Zeichne Linien der Segmentierung auf das Bild

@@ -1,4 +1,4 @@
-from detection import mask
+from model import mask
 import cv2
 import numpy as np
 import torch

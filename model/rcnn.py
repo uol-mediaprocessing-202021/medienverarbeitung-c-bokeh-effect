@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import torch
 import torchvision
-from detection import mask
+from model import mask
 
 
 # RCNN-Algorithmus

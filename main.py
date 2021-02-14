@@ -10,7 +10,7 @@ import cv2
 import numpy
 from PIL import Image, ImageTk
 
-from detection import slic, blur
+from model import slic, blur
 from functions import func_gui, global_vars
 
 

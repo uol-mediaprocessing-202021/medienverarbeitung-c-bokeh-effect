@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from detection import blur
+from model import blur
 
 # Wende Unschärfe auf Bild unter Verwendung der Maske
 def apply_mask(img, mask, blur_style, blur_dim):

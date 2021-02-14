@@ -23,7 +23,7 @@ def help_colab():
     about_text = "\
 Google Colab Dokumentation des Projektes:\n\
 \n\
-https://colab.research.google.com/drive/16Y4wp7qCuzpu2yXUFqc7jMICxJSavPgH"
+https://colab.research.google.com/drive/1m-M0v0KiQN6P16nb0lSmRQM8Ma6bkRsD"
     messagebox.showinfo(message=about_text, title="Colaboratory")
 
 

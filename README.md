@@ -29,7 +29,7 @@ Our implementation is based on Python3 with the following packages you need to i
 **Getting started**
 
 1. Download the project from the "main" branch in our git repository: https://github.com/uol-mediaprocessing-202021/medienverarbeitung-c-bokeh-effect
-2. Download the poolNet Module and unzip its content into the downloaded git project: https://cloudstorage.elearning.uni-oldenburg.de/s/8Ye7T4JeBHn5MEz/download
+2. Download the poolNet Module and unzip its content into the downloaded git projects folder: https://cloudstorage.elearning.uni-oldenburg.de/s/8Ye7T4JeBHn5MEz/download
 3. Execute the main.py in your command shell or integrated development environment (IDE): "python main.py"
 
 

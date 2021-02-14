@@ -412,8 +412,8 @@ sepr1 = Separator(effect_frame, orient=HORIZONTAL)
 sepr1.pack(padx=5, fill=BOTH)
 
 blur_dim = IntVar()
-slider = Scale(effect_frame, from_=5, to=25, bg="#2c2f33", bd=3, fg="white", troughcolor="#3a3e43",
-               length=80, sliderlength=20, variable=blur_dim, resolution=5, highlightbackground="#2c2f33",
+slider = Scale(effect_frame, from_=3, to=100, bg="#2c2f33", bd=3, fg="white", troughcolor="#3a3e43",
+               length=150, sliderlength=20, variable=blur_dim, highlightbackground="#2c2f33",
                activebackground="#2c2f33")
 slider.set(10)
 slider.pack(padx=30, pady=20, fill=BOTH)

@@ -3,6 +3,7 @@ import numpy as np
 from detection import blur
 
 
+# Wende Unschärfe auf Bild unter Verwendung der Maske
 def apply_mask(img, mask, blur_style, blur_dim):
     mask_inverted = np.invert(mask)
     mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)

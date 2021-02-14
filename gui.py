@@ -67,7 +67,7 @@ def save_image():
     cv2.imwrite(y, sec_edit)
 
 
-# bearbeitet Bild mit Torch oder PoolNet
+# Bearbeitet Bild mit Torch oder PoolNet
 def blur_image():
     global x, img, edge_var, scale_var, info_frame, version_label, sec_edit, blur_style, blur_dim
     global auto_mode, focus_mode
@@ -77,7 +77,7 @@ def blur_image():
 
     que = Queue()
 
-    # erstellt einen Thread auf dem die Bildbearbeitung statt findet
+    # Erstellt einen Thread auf dem die Bildbearbeitung statt findet
     try:
         image_thread = func_gui.IPThread(edge_var.get(), x, scale_var.get(), blur_style, blur_dim.get(), que)
         image_thread.start()
@@ -85,20 +85,20 @@ def blur_image():
         print("[Error] unable to start ImageProcessing_Thread")
         time.sleep(1)
 
-    # zeige Ladebalken an, damit Benuter weiß, dass der Algorithmus ausgeführt wird
+    # Zeige Ladebalken an, damit Benuter weiß, dass der Algorithmus ausgeführt wird
     version_label.config(text=" ")
     progress = Progressbar(info_frame, orient=HORIZONTAL, length=75, mode='indeterminate')
     progress.pack(side=LEFT)
     func_gui.bar(progress, info_frame)
 
-    # hohle das fertige Bild aus der que und konvertiere es in PhotoImage
+    # Hohle das fertige Bild aus der queue und konvertiere es in PhotoImage
     if not que.empty():
         sec_edit = que.get()
         result = Image.fromarray(cv2.cvtColor(sec_edit, cv2.COLOR_BGR2RGB))
         result = resize_image(result)
         img = ImageTk.PhotoImage(result)
 
-    # zeige fertiges Bild an
+    # Zeige fertiges Bild an
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
@@ -111,7 +111,7 @@ def blur_image():
     focus_mode.config(background="#2c2f33")
 
 
-# setzt das Bild zum Ursprung zurück
+# Setzt das Bild zum Ursprung zurück
 def reset_image():
     global panel, img, ori_img, ori_resize
     global blur_img, sec_edit
@@ -140,14 +140,15 @@ def reset_image():
     focus_mode.config(background="#2c2f33")
 
 
-# setzt Einstellungen zurück
+# Setzt Einstellungen zurück
 def reset_setup():
     global edge_var, scale_var
     edge_var.set(0)
     scale_var.set(0)
 
 
-# trackt Maus position
+# Trackt Maus position
+# Event linker Mausklick
 def get_mouse_posn(event):
     global x_start, y_start, x_end, y_end
 
@@ -155,7 +156,8 @@ def get_mouse_posn(event):
     x_end, y_end = event.x, event.y
 
 
-# updated Fokusbereich
+# Updated Fokusbereich
+# Event Mauszeiger bewegungen
 def update_sel_rect(event):
     global rect_id, panel, sec_edit, img, ori_img
     global x_start, y_start, x_end, y_end, slider_var, check_var
@@ -164,18 +166,20 @@ def update_sel_rect(event):
     panel.coords(rect_id, x_start, y_start, x_end, y_end)
 
 
+# Setzt prozess für Unschärfe auf Segmentierte Bereiche an
+# Event linke Maustaste loslassen
 def blur_area(event):
     global rect_id, panel, sec_edit, img, ori_img, image_scale
     global x_start, y_start, x_end, y_end, slider_var, check_var, blur_style, blur_dim
 
     original_img = cv2.imread(x)
 
-    # editiere die ausgewählten segmente
+    # Editiere die ausgewählten Segmente
     sec_edit = slic.edit_segment(sec_edit, original_img, slider_var.get(), int(x_start / image_scale),
                                  int(x_end / image_scale), int(y_start / image_scale), int(y_end / image_scale),
                                  check_var.get(), blur_style, blur_dim.get())
 
-    # konvertiere Ergebnis in PhotImage und zeige an
+    # Konvertiere Ergebnis in PhotoImage und zeige an
     result = Image.fromarray(cv2.cvtColor(sec_edit, cv2.COLOR_BGR2RGB).astype(numpy.uint8))
     result = resize_image(result)
     img = ImageTk.PhotoImage(result)
@@ -193,18 +197,18 @@ def blur_area(event):
     panel.unbind('<ButtonRelease-1>')
 
 
-# wechsel zu fokus Modus
+# Wechsel zu Fokus Modus
 def focus_blur():
     global panel, img, x, sec_edit, rect_id, slider_var
 
     auto_mode.config(background="#2c2f33")
     focus_mode.config(background="#23272a")
 
-    # erstelle segmentiertes Bild für Benuzer
+    # Erstelle segmentiertes Bild für Benuzer
     cv_img = cv2.imread(x)
     seg = slic.show_segmentation(sec_edit, cv_img, slider_var.get())
 
-    # konvertiere und zeige an
+    # Konvertiere und zeige an
     result = Image.fromarray(cv2.cvtColor(seg, cv2.COLOR_BGR2RGB).astype(numpy.uint8))
     result = resize_image(result)
     img = ImageTk.PhotoImage(result)
@@ -212,7 +216,7 @@ def focus_blur():
     panel.config(width=img.width(), height=img.height())
     panel.create_image(0, 0, image=img, anchor=NW)
 
-    # zeichne Rechteck um Maus
+    # Zeichne Rechteck um Maus
     rect_id = panel.create_rectangle(y_start, x_start, y_start, x_start, dash=(20, 20), fill='', outline='white')
 
     panel.bind('<Button-1>', get_mouse_posn)
@@ -250,7 +254,7 @@ def resize_image(image):
         return image
 
 
-# passt die variable blur_style an damit richtige Unschärfe-Objekte gezeigt werden
+# Passt die variable blur_style an damit richtige Unschärfe-Objekte gezeigt werden
 def change_blur_style(value):
     global blur_style, round_button, ring_button, cross_button
 
@@ -304,7 +308,7 @@ round_i = ImageTk.PhotoImage(Image.open("images/tool_icons/circles.png").resize(
 ring_i = ImageTk.PhotoImage(Image.open("images/tool_icons/rings.png").resize((35, 35), Image.ANTIALIAS))
 cross_i = ImageTk.PhotoImage(Image.open("images/tool_icons/cross.png").resize((35, 35), Image.ANTIALIAS))
 
-# reserviere Speicherplatz für zu bearbeitendes Bild und Kopie für reset
+# Reserviere Speicherplatz für zu bearbeitendes Bild und Kopie für reset
 x = 'images/placeholder.png'
 img = ImageTk.PhotoImage(Image.open(x))
 ori_img = img
@@ -418,7 +422,7 @@ sepr2 = Separator(effect_frame, orient=HORIZONTAL)
 sepr2.pack(padx=5, fill=BOTH)
 
 
-# label für Bildinfo erstellen
+# Label für Bildinfo erstellen
 info_label = Label(info_frame, background="#23272a", fg="white")
 info_label.pack(side=RIGHT, padx=2, pady=5)
 version_label = Label(info_frame, background="#23272a", text="Version: " + global_vars.version, fg="white")

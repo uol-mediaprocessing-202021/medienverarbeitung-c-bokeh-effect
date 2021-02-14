@@ -2,9 +2,10 @@ import cv2
 import numpy as np
 import torch
 import torchvision
-from detection import blur, mask
+from detection import mask
 
 
+# RCNN-Algorithmus
 def rcnn_blur(source, blur_style, blur_dim):
     img = cv2.imread(source)
 

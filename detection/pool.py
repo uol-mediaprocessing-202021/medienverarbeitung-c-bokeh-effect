@@ -1,9 +1,10 @@
-from detection import blur, mask
+from detection import mask
 import cv2
 import numpy as np
 import torch
 
 
+# Pool-Algorithmus
 def pool(source, use_scale, blur_style, blur_dim):
     img = cv2.imread(source)
 
@@ -12,6 +13,7 @@ def pool(source, use_scale, blur_style, blur_dim):
     return mask.apply_mask(img, mak, blur_style, blur_dim)
 
 
+# Passt Größe des Bildes für Kantenfindung an
 def compress_image(img):
     height, width = img.shape[:2]
 

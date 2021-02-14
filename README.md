@@ -9,7 +9,8 @@ The program should be easy to use and understand for the common user but at the 
 
 **Required Packages:**
 
-Our implementation is based on Python3 with the following packages you need to install into your Python environment first to execute our program:
+Our implementation is based on Python3 with the following packages you need to install into your Python environment first to execute our program.
+
 *Note:* Behind the installation commands are the versions we are using with our project.  
 
 -pip3 install opencv-python (version 4.4.0)
